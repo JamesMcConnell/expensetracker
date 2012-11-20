@@ -1,0 +1,121 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+<div class="span3">
+	<div id="budget-list-container" class="well sidebar-nav">
+		<ul class="nav nav-list" data-bind="template: { name: 'budgetTemplate', foreach: budgets }"></ul>
+		<button class="btn btn-info btn-block btn-small" type="button" data-bind="click: addPaycheck">Add New Paycheck</button>
+	</div>
+</div>
+<div class="span9">
+	<div class="hero-unit">
+		<h1>Hello, World</h1>
+	</div>
+</div>
+<!-- ko if: selectedBudget -->
+<div id="edit-paycheckbudget-modal" class="modal hide fade in">
+	<div id="edit-paycheckbudget-container">
+		<!-- ko template: { name: 'manageBudgetTemplate', with: selectedBudget } -->
+		<!-- /ko -->
+	</div>
+</div>
+<!-- /ko -->
+<script type="text/html" id="budgetTemplate">
+	<li class="nav-header">
+		Paycheck for <span data-bind="text: PaycheckBudgetDate()"></span> - <span data-bind="text: formatCurrency(PaycheckBudgetAmount())"></span>
+		<button class="btn-link pull-right edit-paycheck" data-bind="click: $parent.editPaycheck">Edit</button>
+	</li>
+	<li>
+		<table class="table table-bordered table-condensed">
+			<thead>
+				<tr>
+					<th>Description</th>
+					<th>Amount</th>
+					<th>Due Date</th>
+					<th>Paid/Unpaid</th>
+				</tr>
+			</thead>
+			<tbody data-bind="template: { name: 'budgetItemTemplate', foreach: Items }"></tbody>
+		</table>
+		Remaining: <span data-bind="text: formatCurrency(Remaining())"></span>
+		<hr />
+	</li>
+</script>
+<script type="text/html" id="budgetItemTemplate">
+	<tr>
+		<td><span data-bind="text: Description"></span></td>
+		<td><span data-bind="text: formatCurrency(Amount())"></span></td>
+		<td><span data-bind="text: DueDate"></span></td>
+		<td>
+			<button class="btn-link pull-right update-status" data-bind="visible: !PaidStatus(), text: IsPaid, click: updateStatus" title="Mark this item as paid" />
+			<span style="padding: 1px 6px;" class="pull-right" data-bind="visible: PaidStatus(), text: IsPaid"></span>
+		</td>
+	</tr>
+</script>
+<script type="text/html" id="manageBudgetTemplate">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+		<h4>Edit Paycheck Budget</h4>
+	</div>
+	<div class="modal-body">
+		<div class="control-group">
+			<label class="control-label" for="PaycheckBudgetDate">Due Date</label>
+			<div class="controls">
+				<input type="text" id="PaycheckBudgetDate" placeholder="Due Date" data-bind='value: PaycheckBudgetDate, valueUpdate: "afterKeyDown"' />
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label" for="PaycheckBudgetAmount">Amount</label>
+			<div class="controls">
+				<input type="text" id="PaycheckBudgetAmount" placeholder="Amount" data-bind='value: PaycheckBudgetAmount(), valueUpdate: "afterKeyDown"' />
+			</div>
+		</div>
+		<div>
+			<h4>Budget Items</h4>
+			<table id="item-table" class="table table-bordered table-condensed">
+				<thead>
+					<tr>
+						<th>Description</th>
+						<th>Amount</th>
+						<th>Due Date</th>
+						<th>Paid/Unpaid</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody data-bind='foreach: Items'>
+					<tr>
+						<td>
+							<input type="text" class="input-small" data-bind='value: Description(), valueUpdate: "afterKeyDown"' />
+						</td>
+						<td>
+							<input type="text" class="input-small" data-bind='value: Amount(), valueUpdate: "afterKeyDown"' />
+						</td>
+						<td>
+							<input type="text" class="input-small item-duedate" data-bind='value: DueDate(), valueUpdate: "afterKeyDown"' />
+						</td>
+						<td>
+							<input type="checkbox" class="input-small" data-bind='checked: PaidStatus()' />
+						</td>
+						<td>
+							<input type="hidden" data-bind='value: PaycheckBudgetId()' />
+							<input type="hidden" data-bind='value: PaycheckBudgetItemId()' />
+							<button class="btn btn-small clear-item" data-bind='click: $parent.removeItem, clickBubble: false'>Remove</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<button class="btn btn-info btn-small pull-right" data-bind='click: $parent.addItem'>Add Budget Item</button>
+	</div>
+	<div class="modal-footer">
+		<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+		<button class="btn btn-primary" data-bind="click: $root.submitData">Save Changes</button>
+	</div>
+</script>
+@section Scripts {
+	<script type="text/javascript">
+		$.getJSON('/api/paycheckbudget', function (data) {
+			ko.applyBindings(new BudgetListViewModel(data), $('#budget-list-container')[0]);
+		});
+	</script>
+}
