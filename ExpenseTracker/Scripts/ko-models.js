@@ -27,38 +27,46 @@ var PaycheckBudgetItem = function () {
 };
 
 var PaycheckBudget = function () {
-    var self = this;
-    self.PaycheckBudgetId = ko.observable();
-    self.PaycheckBudgetDate = ko.observable();
-    self.PaycheckBudgetAmount = ko.observable();
-    self.Remaining = ko.observable();
-    self.Items = ko.observableArray([]);
+	var self = this;
+	self.PaycheckBudgetId = ko.observable();
+	self.PaycheckBudgetDate = ko.observable();
+	self.PaycheckBudgetAmount = ko.observable();
 
-    self.loadData = function (data) {
-        self.PaycheckBudgetId(data.PaycheckBudgetId);
-        self.PaycheckBudgetDate(data.PaycheckBudgetDate);
-        self.PaycheckBudgetAmount(data.PaycheckBudgetAmount);
-        self.Remaining(data.Remaining);
-        self.Items(ko.utils.arrayMap(data.Items, function (item) {
-            var budgetItem = new PaycheckBudgetItem();
-            budgetItem.loadData(item);
-            return budgetItem;
-        }));
-    };
+	self.Remaining = ko.observable();
+	self.Items = ko.observableArray([]);
+	self.RemainingAmount = ko.computed(function () {
+		var sum = 0;
+		ko.utils.arrayForEach(self.Items, function (item) {
+			sum += item.Amount;
+		});
+		return self.PaycheckBudgetAmount - sum;
+	});
 
-    self.addItem = function () {
-        self.Items.push(new PaycheckBudgetItem());
-        // This attaches the jQuery UI datepicker to the dynamically created input.
-        $('.item-duedate:not(.hasDatePicker)').datepicker({
-            showOn: 'button',
-            buttonImage: 'images/calendar.gif',
-            buttonImageOnly: true
-        });
-    };
+	self.loadData = function (data) {
+		self.PaycheckBudgetId(data.PaycheckBudgetId);
+		self.PaycheckBudgetDate(data.PaycheckBudgetDate);
+		self.PaycheckBudgetAmount(data.PaycheckBudgetAmount);
+		self.Remaining(data.Remaining);
+		self.Items(ko.utils.arrayMap(data.Items, function (item) {
+			var budgetItem = new PaycheckBudgetItem();
+			budgetItem.loadData(item);
+			return budgetItem;
+		}));
+	};
 
-    self.removeItem = function (item) {
-        self.Items.remove(item);
-    };
+	self.addItem = function () {
+		self.Items.push(new PaycheckBudgetItem());
+		// This attaches the jQuery UI datepicker to the dynamically created input.
+		$('.item-duedate:not(.hasDatePicker)').datepicker({
+			showOn: 'button',
+			buttonImage: 'images/calendar.gif',
+			buttonImageOnly: true
+		});
+	};
+
+	self.removeItem = function (item) {
+		self.Items.remove(item);
+	};
 };
 
 var BudgetListViewModel = function (data) {
