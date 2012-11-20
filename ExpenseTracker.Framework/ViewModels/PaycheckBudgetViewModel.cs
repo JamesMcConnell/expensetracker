@@ -44,9 +44,6 @@ namespace ExpenseTracker.Framework.ViewModels
 		public string DueDate { get; set; }
 
 		[DataMember]
-		public string IsPaid { get; set; }
-
-		[DataMember]
-		public bool PaidStatus { get; set; }
+		public bool IsPaid { get; set; }
 	}
 }

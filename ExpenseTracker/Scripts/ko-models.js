@@ -3,30 +3,27 @@
 }
 
 var PaycheckBudgetItem = function () {
-    var self = this;
-    self.PaycheckBudgetItemId = ko.observable();
-    self.PaycheckBudgetId = ko.observable();
-    self.Description = ko.observable();
-    self.Amount = ko.observable();
-    self.DueDate = ko.observable();
-    self.IsPaid = ko.observable();
-    self.PaidStatus = ko.observable();
+	var self = this;
+	self.PaycheckBudgetItemId = ko.observable();
+	self.PaycheckBudgetId = ko.observable();
+	self.Description = ko.observable();
+	self.Amount = ko.observable();
+	self.DueDate = ko.observable();
+	self.IsPaid = ko.observable();
 
-    self.loadData = function (data) {
-        self.PaycheckBudgetItemId(data.PaycheckBudgetItemId);
-        self.PaycheckBudgetId(data.PaycheckBudgetId);
-        self.Description(data.Description);
-        self.Amount(data.Amount);
-        self.DueDate(data.DueDate);
-        self.IsPaid(data.IsPaid);
-        self.PaidStatus(data.PaidStatus);
-    };
+	self.loadData = function (data) {
+		self.PaycheckBudgetItemId(data.PaycheckBudgetItemId);
+		self.PaycheckBudgetId(data.PaycheckBudgetId);
+		self.Description(data.Description);
+		self.Amount(data.Amount);
+		self.DueDate(data.DueDate);
+		self.IsPaid(data.IsPaid);
+	};
 
-    self.updateStatus = function (item) {
-        item.PaidStatus(true);
-        item.IsPaid('Paid');
-        app.dataservice.updatePaycheckBudgetItem(item.PaycheckBudgetItemId(), ko.toJSON(item));
-    };
+	self.updateStatus = function (item) {
+		item.IsPaid(true);
+		app.dataservice.updatePaycheckBudgetItem(item.PaycheckBudgetItemId(), ko.toJSON(item));
+	};
 };
 
 var PaycheckBudget = function () {
@@ -65,34 +62,34 @@ var PaycheckBudget = function () {
 };
 
 var BudgetListViewModel = function (data) {
-    var self = this;
-    self.budgets = ko.observableArray(ko.utils.arrayMap(data, function (item) {
-        var budget = new PaycheckBudget();
-        budget.loadData(item);
-        return budget;
-    }));
+	var self = this;
+	self.budgets = ko.observableArray(ko.utils.arrayMap(data, function (item) {
+		var budget = new PaycheckBudget();
+		budget.loadData(item);
+		return budget;
+	}));
 
-    self.selectedBudget = ko.observable();
+	self.selectedBudget = ko.observable(new PaycheckBudget());
 
-    self.editPaycheck = function (item) {
-        $('#edit-paycheckbudget-modal').modal('show');
-        self.selectedBudget = item;
-    };
+	self.editPaycheck = function (pb) {
+		//$('#edit-paycheckbudget-modal').modal('show');
+		self.selectedBudget(pb);
+	};
 
-    self.addPaycheck = function () {
-        $('#edit-paycheckbudget-modal').modal('show');
-        self.selectedBudget(new PaycheckBudget());
-    };
+	self.addPaycheck = function () {
+		//$('#edit-paycheckbudget-modal').modal('show');
+		self.selectedBudget(new PaycheckBudget());
+	};
 
-    self.submitData = function (item) {
-        app.dataservice.submitPaycheckBudget(
+	self.submitData = function (item) {
+		app.dataservice.submitPaycheckBudget(
             ko.toJSON(item),
             function (result) {
-                $('#edit-paycheckbudget-modal').modal('hide');
+            	$('#edit-paycheckbudget-modal').modal('hide');
             },
             function (xhr) {
-                alert(xhr.statusText + " " + xhr.repsonseText);
+            	alert(xhr.statusText + " " + xhr.repsonseText);
             }
         );
-    };
+	};
 };

@@ -12,23 +12,23 @@
 		<h1>Hello, World</h1>
 	</div>
 </div>
-<div id="edit-paycheckbudget-modal" class="modal hide fade in">
-	<div id="edit-paycheckbudget-container" data-bind="with: selectedBudget">
+<div id="edit-paycheckbudget-modal">
+	<div id="edit-paycheckbudget-container">		
 		<div class="modal-header">
 		    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
 		    <h4>Edit Paycheck Budget</h4>
 	    </div>
 	    <div class="modal-body">
 		    <div class="control-group">
-			    <label class="control-label" for="PaycheckBudgetDate">Due Date</label>
+			    <label class="control-label" for="selectedBudget.PaycheckBudgetDate()">Due Date</label>
 			    <div class="controls">
-				    <input type="text" id="PaycheckBudgetDate" placeholder="Due Date" data-bind='value: PaycheckBudgetDate, valueUpdate: "afterKeyDown"' />
+				    <input type="text" id="PaycheckBudgetDate" placeholder="Due Date" data-bind='value: selectedBudget.PaycheckBudgetDate(), valueUpdate: "afterKeyDown"' />
 			    </div>
 		    </div>
 		    <div class="control-group">
 			    <label class="control-label" for="PaycheckBudgetAmount">Amount</label>
 			    <div class="controls">
-				    <input type="text" id="PaycheckBudgetAmount" placeholder="Amount" data-bind='value: PaycheckBudgetAmount(), valueUpdate: "afterKeyDown"' />
+				    <input type="text" id="PaycheckBudgetAmount" placeholder="Amount" data-bind='value: selectedBudget.PaycheckBudgetAmount(), valueUpdate: "afterKeyDown"' />
 			    </div>
 		    </div>
 		    <div>
@@ -43,7 +43,7 @@
 						    <th></th>
 					    </tr>
 				    </thead>
-				    <tbody data-bind='foreach: Items'>
+				    <tbody data-bind='foreach: selectedBudget.Items'>
 					    <tr>
 						    <td>
 							    <input type="text" class="input-small" data-bind='value: Description(), valueUpdate: "afterKeyDown"' />
@@ -55,7 +55,7 @@
 							    <input type="text" class="input-small item-duedate" data-bind='value: DueDate(), valueUpdate: "afterKeyDown"' />
 						    </td>
 						    <td>
-							    <input type="checkbox" class="input-small" data-bind='checked: PaidStatus()' />
+							    <input type="checkbox" class="input-small" data-bind='checked: IsPaid()' />
 						    </td>
 						    <td>
 							    <input type="hidden" data-bind='value: PaycheckBudgetId()' />
@@ -70,7 +70,7 @@
 	    </div>
 	    <div class="modal-footer">
 		    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-		    <button class="btn btn-primary" data-bind="click: $root.submitData">Save Changes</button>
+		    <button class="btn btn-primary" data-bind="click: $parent.submitData">Save Changes</button>
 	    </div>
 	</div>
 </div>
@@ -101,8 +101,8 @@
 		<td><span data-bind="text: formatCurrency(Amount())"></span></td>
 		<td><span data-bind="text: DueDate"></span></td>
 		<td>
-			<button class="btn-link pull-right update-status" data-bind="visible: !PaidStatus(), text: IsPaid, click: updateStatus" title="Mark this item as paid" />
-			<span style="padding: 1px 6px;" class="pull-right" data-bind="visible: PaidStatus(), text: IsPaid"></span>
+			<button class="btn-link pull-right update-status" data-bind="visible: !IsPaid(), click: updateStatus" title="Mark this item as paid">Unpaid</button>
+			<span style="padding: 1px 6px;" class="pull-right" data-bind="visible: IsPaid()">Paid</span>
 		</td>
 	</tr>
 </script>

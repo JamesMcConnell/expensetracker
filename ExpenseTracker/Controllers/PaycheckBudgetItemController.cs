@@ -42,7 +42,7 @@ namespace ExpenseTracker.Controllers
 				PaycheckBudgetId = budgetItem.PaycheckBudgetItemId,
 				Amount = budgetItem.Amount,
 				Description = budgetItem.Description,
-				IsPaid = budgetItem.PaidStatus,
+				IsPaid = budgetItem.IsPaid,
 				PaidDate = Convert.ToDateTime(budgetItem.DueDate)
 			};
 

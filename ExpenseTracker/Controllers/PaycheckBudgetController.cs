@@ -41,8 +41,7 @@ namespace ExpenseTracker.Controllers
 						Description = pbi.Description,
 						Amount = pbi.Amount,
 						DueDate = pbi.PaidDate.ToShortDateString(),
-                        PaidStatus = pbi.IsPaid,
-						IsPaid = (pbi.IsPaid) ? "Paid" : "Unpaid"
+                        IsPaid = pbi.IsPaid
 					})
 				};
 
@@ -72,8 +71,7 @@ namespace ExpenseTracker.Controllers
                     Description = x.Description,
                     Amount = x.Amount,
                     DueDate = x.PaidDate.ToShortDateString(),
-                    PaidStatus = x.IsPaid,
-                    IsPaid = (x.IsPaid) ? "Paid" : "Unpaid"
+                    IsPaid = x.IsPaid
                 })
             };
 
@@ -95,7 +93,7 @@ namespace ExpenseTracker.Controllers
                 PaycheckBudgetId = x.PaycheckBudgetId,
                 Amount = x.Amount,
                 Description = x.Description,
-                IsPaid = x.PaidStatus,
+                IsPaid = x.IsPaid,
                 PaidDate = Convert.ToDateTime(x.DueDate)
             });
 
