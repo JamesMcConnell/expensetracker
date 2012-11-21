@@ -76,7 +76,7 @@
 </div>
 <script type="text/html" id="budgetTemplate">
 	<li class="nav-header">
-		Paycheck for <span data-bind="text: PaycheckBudgetDate()"></span> - <span data-bind="text: formatCurrency(PaycheckBudgetAmount())"></span>
+		Paycheck for <span data-bind="text: app.utilities.formatDate(PaycheckBudgetDate())"></span> - <span data-bind="text: app.utilities.formatCurrency(PaycheckBudgetAmount())"></span>
 		<button class="btn-link pull-right edit-paycheck" data-bind="click: $parent.editPaycheck">Edit</button>
 	</li>
 	<li>
@@ -91,15 +91,15 @@
 			</thead>
 			<tbody data-bind="template: { name: 'budgetItemTemplate', foreach: PaycheckBudgetItems }"></tbody>
 		</table>
-		Remaining: <span data-bind="text: formatCurrency(RemainingAmount())"></span>
+		Remaining: <span data-bind="text: app.utilities.formatCurrency(RemainingAmount())"></span>
 		<hr />
 	</li>
 </script>
 <script type="text/html" id="budgetItemTemplate">
 	<tr>
 		<td><span data-bind="text: Description"></span></td>
-		<td><span data-bind="text: formatCurrency(Amount())"></span></td>
-		<td><span data-bind="text: formatDate(PaidDate())"></span></td>
+		<td><span data-bind="text: app.utilities.formatCurrency(Amount())"></span></td>
+		<td><span data-bind="text: app.utilities.formatDate(PaidDate())"></span></td>
 		<td>
 			<button class="btn-link pull-right update-status" data-bind="visible: !IsPaid(), click: updateStatus" title="Mark this item as paid">Unpaid</button>
 			<span style="padding: 1px 6px;" class="pull-right" data-bind="visible: IsPaid()">Paid</span>
@@ -108,8 +108,9 @@
 </script>
 @section Scripts {
 	<script type="text/javascript">
-        app.dataservice.getAllPaycheckBudgets(function (data) {
-			ko.applyBindings(new BudgetListViewModel(data), $('#budget-list-container')[0]);
+		app.dataservice.getAllPaycheckBudgets(function (data) {
+			app.BudgetListViewModel.loadData(data);
+			ko.applyBindings(app.BudgetListViewModel, $('#budget-list-container')[0]);
 		});
 	</script>
 }
