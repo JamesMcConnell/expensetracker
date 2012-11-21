@@ -35,26 +35,22 @@
 		self.PaycheckBudgetDate = ko.observable();
 		self.PaycheckBudgetAmount = ko.observable();
 		self.PaycheckBudgetItems = ko.observableArray([]);
-		self.RemainingAmount = ko.computed(function () {
-			if (self.PaycheckBudgetItems().length > 0) {
-				var itemSum = 0;
-				ko.utils.arrayForEach(self.PaycheckBudgetItems(), function (item) {
-					itemSum += item.Amount;
-				});
-				return self.PaycheckBudgetAmount() - itemSum;
-			} else {
-				return 0;
-			}
-		});
+		self.RemainingAmount = ko.observable();
 
 		self.loadData = function (data) {
 			self.PaycheckBudgetId(data.PaycheckBudgetId);
 			self.PaycheckBudgetDate(app.utilities.formatDate(data.PaycheckBudgetDate));
 			self.PaycheckBudgetAmount(data.PaycheckBudgetAmount);
 			self.PaycheckBudgetItems(ko.utils.arrayMap(data.PaycheckBudgetItems, function (item) {
-				var budgetItem = app.PaycheckBudgetItem.loadData(item);
-				return budgetItem;
+				return app.PaycheckBudgetItem.loadData(item);
 			}));
+
+			console.log(self.PaycheckBudgetItems);
+			//			var itemSum = 0;
+			//			ko.utils.arrayForEach(self.PaycheckBudgetItems(), function (item) {
+			//				itemSum += item.Amount();
+			//			});
+			//			self.RemainingAmount(itemSum);
 		};
 
 		self.addItem = function () {
