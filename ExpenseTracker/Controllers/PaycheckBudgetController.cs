@@ -18,68 +18,19 @@ namespace ExpenseTracker.Controllers
 		}
 
         // GET api/paycheckbudget
-        public IEnumerable<PaycheckBudgetViewModel> Get()
+        public IEnumerable<PaycheckBudget> Get()
         {
-			var paycheckBudgets = _repo.FetchAll().ToList();
-			var paycheckBudgetViewModels = new List<PaycheckBudgetViewModel>();
-
-			foreach (var paycheckBudget in paycheckBudgets)
-			{
-				var items = _repo.FetchAllItemsForPaycheckBudget(paycheckBudget.PaycheckBudgetId).ToList();
-				var itemTotal = items.Sum(pbi => pbi.Amount);
-
-				var vm = new PaycheckBudgetViewModel
-				{
-					PaycheckBudgetId = paycheckBudget.PaycheckBudgetId,
-					PaycheckBudgetDate = paycheckBudget.PaycheckBudgetDate.ToShortDateString(),
-					PaycheckBudgetAmount = paycheckBudget.PaycheckBudgetAmount,
-					Remaining = paycheckBudget.PaycheckBudgetAmount - itemTotal,
-					Items = items.Select(pbi => new PaycheckBudgetItemViewModel
-					{
-                        PaycheckBudgetItemId = pbi.PaycheckBudgetItemId,
-                        PaycheckBudgetId = pbi.PaycheckBudgetId,
-						Description = pbi.Description,
-						Amount = pbi.Amount,
-						DueDate = pbi.PaidDate.ToShortDateString(),
-                        IsPaid = pbi.IsPaid
-					})
-				};
-
-				paycheckBudgetViewModels.Add(vm);
-			}
-
-			return paycheckBudgetViewModels;
+			return _repo.FetchAll();
         }
 
         // GET api/paycheckbudget/5
-        public PaycheckBudgetViewModel Get(int id)
+        public PaycheckBudget Get(int id)
         {
-            var dbPaycheckBudget = _repo.FetchById(id);
-            var items = _repo.FetchAllItemsForPaycheckBudget(id);
-            var itemTotal = items.Sum(x => x.Amount);
-
-            var vm = new PaycheckBudgetViewModel
-            {
-                PaycheckBudgetId = id,
-                PaycheckBudgetDate = dbPaycheckBudget.PaycheckBudgetDate.ToShortDateString(),
-                PaycheckBudgetAmount = dbPaycheckBudget.PaycheckBudgetAmount,
-                Remaining = dbPaycheckBudget.PaycheckBudgetAmount - itemTotal,
-                Items = items.Select(x => new PaycheckBudgetItemViewModel
-                {
-                    PaycheckBudgetId = id,
-                    PaycheckBudgetItemId = x.PaycheckBudgetItemId,
-                    Description = x.Description,
-                    Amount = x.Amount,
-                    DueDate = x.PaidDate.ToShortDateString(),
-                    IsPaid = x.IsPaid
-                })
-            };
-
-            return vm;
+            return _repo.FetchById(id);
         }
 
         // POST api/paycheckbudget
-        public IEnumerable<PaycheckBudgetViewModel> Post(PaycheckBudgetViewModel budgetViewModel)
+        public IEnumerable<PaycheckBudget> Post(PaycheckBudgetViewModel budgetViewModel)
         {
             var paycheckBudget = new PaycheckBudget
             {

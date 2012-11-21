@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Data.Entity;
 using ExpenseTracker.Framework.Models;
 
 namespace ExpenseTracker.Framework.Data.Concrete
@@ -11,7 +12,7 @@ namespace ExpenseTracker.Framework.Data.Concrete
 		{
 			using (var context = new ExpenseTrackerEntities())
 			{
-				return context.PaycheckBudgets.ToList();
+				return context.PaycheckBudgets.Include(i => i.PaycheckBudgetItems).ToList();
 			}
 		}
 
@@ -19,7 +20,7 @@ namespace ExpenseTracker.Framework.Data.Concrete
 		{
 			using (var context = new ExpenseTrackerEntities())
 			{
-				return context.PaycheckBudgets.FirstOrDefault(pb => pb.PaycheckBudgetId == paycheckBudgetId);
+				return context.PaycheckBudgets.Include(i => i.PaycheckBudgetItems).FirstOrDefault(pb => pb.PaycheckBudgetId == paycheckBudgetId);
 			}
 		}
 

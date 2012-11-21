@@ -2,13 +2,18 @@
 	return '$' + value.toFixed(2);
 }
 
+function formatDate(value) {
+	var d = Date.parse(value);
+	return d.toString("M/d/yyyy");
+}
+
 var PaycheckBudgetItem = function () {
 	var self = this;
 	self.PaycheckBudgetItemId = ko.observable();
 	self.PaycheckBudgetId = ko.observable();
 	self.Description = ko.observable();
 	self.Amount = ko.observable();
-	self.DueDate = ko.observable();
+	self.PaidDate = ko.observable();
 	self.IsPaid = ko.observable();
 
 	self.loadData = function (data) {
@@ -16,7 +21,7 @@ var PaycheckBudgetItem = function () {
 		self.PaycheckBudgetId(data.PaycheckBudgetId);
 		self.Description(data.Description);
 		self.Amount(data.Amount);
-		self.DueDate(data.DueDate);
+		self.PaidDate(data.PaidDate);
 		self.IsPaid(data.IsPaid);
 	};
 
@@ -31,23 +36,24 @@ var PaycheckBudget = function () {
 	self.PaycheckBudgetId = ko.observable();
 	self.PaycheckBudgetDate = ko.observable();
 	self.PaycheckBudgetAmount = ko.observable();
-
-	self.Remaining = ko.observable();
-	self.Items = ko.observableArray([]);
+	self.PaycheckBudgetItems = ko.observableArray([]);
 	self.RemainingAmount = ko.computed(function () {
-		var sum = 0;
-		ko.utils.arrayForEach(self.Items, function (item) {
-			sum += item.Amount;
-		});
-		return self.PaycheckBudgetAmount - sum;
+		if (self.PaycheckBudgetItems().length > 0) {
+			var itemSum = 0;
+			ko.utils.arrayForEach(self.PaycheckBudgetItems(), function (item) {
+				itemSum += item.Amount();
+			});
+			return self.PaycheckBudgetAmount() - itemSum;
+		} else {
+			return 0;
+		}
 	});
 
 	self.loadData = function (data) {
 		self.PaycheckBudgetId(data.PaycheckBudgetId);
-		self.PaycheckBudgetDate(data.PaycheckBudgetDate);
+		self.PaycheckBudgetDate(formatDate(data.PaycheckBudgetDate));
 		self.PaycheckBudgetAmount(data.PaycheckBudgetAmount);
-		self.Remaining(data.Remaining);
-		self.Items(ko.utils.arrayMap(data.Items, function (item) {
+		self.PaycheckBudgetItems(ko.utils.arrayMap(data.PaycheckBudgetItems, function (item) {
 			var budgetItem = new PaycheckBudgetItem();
 			budgetItem.loadData(item);
 			return budgetItem;

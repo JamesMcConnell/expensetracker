@@ -89,9 +89,9 @@
 					<th>Paid/Unpaid</th>
 				</tr>
 			</thead>
-			<tbody data-bind="template: { name: 'budgetItemTemplate', foreach: Items }"></tbody>
+			<tbody data-bind="template: { name: 'budgetItemTemplate', foreach: PaycheckBudgetItems }"></tbody>
 		</table>
-		Remaining: <span data-bind="text: formatCurrency(Remaining())"></span>
+		Remaining: <span data-bind="text: formatCurrency(RemainingAmount())"></span>
 		<hr />
 	</li>
 </script>
@@ -99,7 +99,7 @@
 	<tr>
 		<td><span data-bind="text: Description"></span></td>
 		<td><span data-bind="text: formatCurrency(Amount())"></span></td>
-		<td><span data-bind="text: DueDate"></span></td>
+		<td><span data-bind="text: formatDate(PaidDate())"></span></td>
 		<td>
 			<button class="btn-link pull-right update-status" data-bind="visible: !IsPaid(), click: updateStatus" title="Mark this item as paid">Unpaid</button>
 			<span style="padding: 1px 6px;" class="pull-right" data-bind="visible: IsPaid()">Paid</span>
