@@ -91,7 +91,7 @@
 			</thead>
 			<tbody data-bind="template: { name: 'budgetItemTemplate', foreach: PaycheckBudgetItems }"></tbody>
 		</table>
-		@*Remaining: <span data-bind="text: app.utilities.formatCurrency(RemainingAmount())"></span>*@
+		Remaining: <span data-bind="text: app.utilities.formatCurrency(RemainingAmount())"></span>
 		<hr />
 	</li>
 </script>
@@ -109,8 +109,7 @@
 @section Scripts {
 	<script type="text/javascript">
 		app.dataservice.getAllPaycheckBudgets(function (data) {
-			app.BudgetListViewModel.loadData(data);
-			ko.applyBindings(app.BudgetListViewModel, $('#budget-list-container')[0]);
+			ko.applyBindings(new BudgetListViewModel(data), $('#budget-list-container')[0]);
 		});
 	</script>
 }
