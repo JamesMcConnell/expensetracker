@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataContracts\PaycheckBudgetDataContract.cs" />
     <Compile Include="Data\Concrete\PaycheckBudgetRepository.cs" />
     <Compile Include="Data\IPaycheckBudgetRepository.cs" />
     <Compile Include="Models\DbContext.Designer.cs">

@@ -43,7 +43,7 @@ namespace ExpenseTracker.Controllers
 				Amount = budgetItem.Amount,
 				Description = budgetItem.Description,
 				IsPaid = budgetItem.IsPaid,
-				PaidDate = Convert.ToDateTime(budgetItem.DueDate)
+				PaidDate = Convert.ToDateTime(budgetItem.PaidDate)
 			};
 
 			_repo.Update(dbBudgetItem);

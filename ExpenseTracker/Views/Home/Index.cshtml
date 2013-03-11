@@ -2,9 +2,39 @@
     ViewBag.Title = "Home Page";
 }
 <div class="span3">
-	<div id="budget-list-container" class="well sidebar-nav">
-		<ul class="nav nav-list" data-bind="template: { name: 'budgetTemplate', foreach: budgets }"></ul>
-		<button class="btn btn-info btn-block btn-small" type="button" data-bind="click: addPaycheck">Add New Paycheck</button>
+	<div id="budget-list-container" class="well sidebar-nav" ng-controller="PaycheckBudgetCtrl">
+		<ul class="nav nav-list">
+            <li class="nav-header" ng-model="selectedBudget" ng-repeat="budget in budgets">
+                <p>
+                    Paycheck for <span>{{budget.date}}</span> - <span>{{formatCurrency(budget.amount)}}</span>
+		            <button class="btn-link pull-right edit-paycheck" ng-click="editBudget(budget)">Edit</button>
+                </p>
+                <table class="table table-bordered table-condensed">
+			        <thead>
+				        <tr>
+					        <th>Description</th>
+					        <th>Amount</th>
+					        <th>Due Date</th>
+					        <th>Paid/Unpaid</th>
+				        </tr>
+			        </thead>
+			        <tbody>
+                        <tr ng-model="selectedBudgetItem" ng-repeat="budgetItem in budget.budgetItems">
+		                    <td><span>{{budgetItem.description}}</span></td>
+		                    <td><span>{{budgetItem.amount}}</span></td>
+		                    <td><span>{{budgetItem.paidDate}}</span></td>
+		                    <td>
+			                    <button ng-show="!isPaid(budgetItem)" ng-click="updateStatus(budgetItem)" class="btn-link pull-right update-status" title="Mark this item as paid">Unpaid</button>
+			                    <span ng-show="isPaid(budgetItem)" style="padding: 1px 6px;" class="pull-right">Paid</span>
+		                    </td>
+	                    </tr>
+                    </tbody>
+		        </table>
+                <p>Remaining: <span>{{formatCurrency(budget.remaining)}}</span></p>
+                <hr />
+	        </li>
+        </ul>
+		<button class="btn btn-info btn-block btn-small" type="button" ng-click="addBudget()">Add New Paycheck</button>
 	</div>
 </div>
 <div class="span9">
@@ -12,7 +42,8 @@
 		<h1>Hello, World</h1>
 	</div>
 </div>
-<div id="edit-paycheckbudget-modal">
+
+<div id="edit-paycheckbudget-modal" ng-controller="PaycheckBudgetCtrl" ng-model="selectedBudget">
 	<div id="edit-paycheckbudget-container">		
 		<div class="modal-header">
 		    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
@@ -20,15 +51,15 @@
 	    </div>
 	    <div class="modal-body">
 		    <div class="control-group">
-			    <label class="control-label" for="selectedBudget.PaycheckBudgetDate()">Due Date</label>
+			    <label class="control-label">Due Date</label>
 			    <div class="controls">
-				    <input type="text" id="PaycheckBudgetDate" placeholder="Due Date" data-bind='value: selectedBudget.PaycheckBudgetDate(), valueUpdate: "afterKeyDown"' />
+				    <input type="text" id="PaycheckBudgetDate" placeholder="Due Date" value="{{date}}" />
 			    </div>
 		    </div>
 		    <div class="control-group">
-			    <label class="control-label" for="PaycheckBudgetAmount">Amount</label>
+			    <label class="control-label">Amount</label>
 			    <div class="controls">
-				    <input type="text" id="PaycheckBudgetAmount" placeholder="Amount" data-bind='value: selectedBudget.PaycheckBudgetAmount(), valueUpdate: "afterKeyDown"' />
+				    <input type="text" id="PaycheckBudgetAmount" placeholder="Amount" value="{{amount}}" />
 			    </div>
 		    </div>
 		    <div>
@@ -43,73 +74,37 @@
 						    <th></th>
 					    </tr>
 				    </thead>
-				    <tbody data-bind='foreach: selectedBudget.Items'>
-					    <tr>
+				    <tbody>
+					    <tr ng-model="selectedBudgetItem" ng-repeat="budgetItem in budgetItems">
 						    <td>
-							    <input type="text" class="input-small" data-bind='value: Description(), valueUpdate: "afterKeyDown"' />
+							    <input type="text" class="input-small" value="{{description}}" />
 						    </td>
 						    <td>
-							    <input type="text" class="input-small" data-bind='value: Amount(), valueUpdate: "afterKeyDown"' />
+							    <input type="text" class="input-small" value="{{amount}}" />
 						    </td>
 						    <td>
-							    <input type="text" class="input-small item-duedate" data-bind='value: DueDate(), valueUpdate: "afterKeyDown"' />
+							    <input type="text" class="input-small item-duedate" value="{{paidDate}}" />
 						    </td>
 						    <td>
-							    <input type="checkbox" class="input-small" data-bind='checked: IsPaid()' />
+							    <input type="checkbox" class="input-small" value="{{isPaid}}" />
 						    </td>
 						    <td>
-							    <input type="hidden" data-bind='value: PaycheckBudgetId()' />
-							    <input type="hidden" data-bind='value: PaycheckBudgetItemId()' />
-							    <button class="btn btn-small clear-item" data-bind='click: $parent.removeItem, clickBubble: false'>Remove</button>
+							    <input type="hidden" id="budgetId" value="{{budgetId}}" />
+							    <input type="hidden" id="budgetItemId" value="{{budgetItemId}}" />
+							    <button class="btn btn-small clear-item">Remove</button>
 						    </td>
 					    </tr>
 				    </tbody>
 			    </table>
 		    </div>
-		    <button class="btn btn-info btn-small pull-right" data-bind='click: $parent.addItem'>Add Budget Item</button>
+		    <button class="btn btn-info btn-small pull-right" ng-click="addBudgetItem()">Add Budget Item</button>
 	    </div>
 	    <div class="modal-footer">
 		    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-		    <button class="btn btn-primary" data-bind="click: $parent.submitData">Save Changes</button>
+		    <button class="btn btn-primary" ng-click="submitData()">Save Changes</button>
 	    </div>
 	</div>
 </div>
-<script type="text/html" id="budgetTemplate">
-	<li class="nav-header">
-		Paycheck for <span data-bind="text: app.utilities.formatDate(PaycheckBudgetDate())"></span> - <span data-bind="text: app.utilities.formatCurrency(PaycheckBudgetAmount())"></span>
-		<button class="btn-link pull-right edit-paycheck" data-bind="click: $parent.editPaycheck">Edit</button>
-	</li>
-	<li>
-		<table class="table table-bordered table-condensed">
-			<thead>
-				<tr>
-					<th>Description</th>
-					<th>Amount</th>
-					<th>Due Date</th>
-					<th>Paid/Unpaid</th>
-				</tr>
-			</thead>
-			<tbody data-bind="template: { name: 'budgetItemTemplate', foreach: PaycheckBudgetItems }"></tbody>
-		</table>
-		Remaining: <span data-bind="text: app.utilities.formatCurrency(RemainingAmount())"></span>
-		<hr />
-	</li>
-</script>
-<script type="text/html" id="budgetItemTemplate">
-	<tr>
-		<td><span data-bind="text: Description"></span></td>
-		<td><span data-bind="text: app.utilities.formatCurrency(Amount())"></span></td>
-		<td><span data-bind="text: app.utilities.formatDate(PaidDate())"></span></td>
-		<td>
-			<button class="btn-link pull-right update-status" data-bind="visible: !IsPaid(), click: updateStatus" title="Mark this item as paid">Unpaid</button>
-			<span style="padding: 1px 6px;" class="pull-right" data-bind="visible: IsPaid()">Paid</span>
-		</td>
-	</tr>
-</script>
 @section Scripts {
-	<script type="text/javascript">
-		app.dataservice.getAllPaycheckBudgets(function (data) {
-			ko.applyBindings(new BudgetListViewModel(data), $('#budget-list-container')[0]);
-		});
-	</script>
+	
 }

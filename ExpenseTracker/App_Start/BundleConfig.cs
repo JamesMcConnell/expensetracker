@@ -19,26 +19,21 @@ namespace ExpenseTracker
 						"~/Scripts/jquery.validate*"));
 
 			bundles.Add(new ScriptBundle("~/bundles/twitterbootstrap").Include(
-						"~/Scripts/bootstrap.js"));
+                        "~/Scripts/bootstrap.js"));
 
-            bundles.Add(new ScriptBundle("~/bundles/knockout").Include(
-                        "~/Scripts/knockout-2.1.0.js",
-						"~/Scripts/knockout.validation.js",
-                        "~/Scripts/knockout.mapping-latest.js"));
-
-            bundles.Add(new ScriptBundle("~/bundles/ko-models").Include(
-                        "~/Scripts/ko-models.js"));
+            bundles.Add(new ScriptBundle("~/bundles/angular").Include(
+                        "~/Scripts/angular.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/static").Include(
-                        "~/Scripts/date.js",
-						"~/Scripts/app.js"));
+                        "~/Scripts/app.js",
+                        "~/StaticContent/js/ang-main.js"));
 
 			// Use the development version of Modernizr to develop with and learn from. Then, when you're
 			// ready for production, use the build tool at http://modernizr.com to pick only the tests you need.
 			bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
 						"~/Scripts/modernizr-*"));
 
-			bundles.Add(new StyleBundle("~/Content/css").Include("~/Content/bootstrap.css"));
+			bundles.Add(new StyleBundle("~/Content/css").Include("~/Content/bootstrap.css", "~/Content/bootstrap-responsive.css"));
 
 			bundles.Add(new StyleBundle("~/Content/themes/base/css").Include(
 						"~/Content/themes/base/jquery.ui.core.css",
