@@ -2,52 +2,43 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
-using ExpenseTracker.Framework.Data;
 using ExpenseTracker.Framework.Models;
 using ExpenseTracker.Framework.ViewModels;
+using Raven.Client;
 
 namespace ExpenseTracker.Controllers
 {
     public class PaycheckBudgetController : ApiController
     {
-		private readonly IPaycheckBudgetRepository _repo;
+        private readonly IDocumentSession _docSession;
 
-		public PaycheckBudgetController(IPaycheckBudgetRepository repo)
+		public PaycheckBudgetController(IDocumentSession docSession)
 		{
-			_repo = repo;
+            _docSession = docSession;
 		}
 
         // GET api/paycheckbudget
         public IEnumerable<PaycheckBudgetViewModel> Get()
         {
-            var allBudgets = _repo.FetchAll();
+            var allBudgets = _docSession.Query<PaycheckBudget>().ToList();
             List<PaycheckBudgetViewModel> paycheckBudgets = new List<PaycheckBudgetViewModel>();
             foreach (var budget in allBudgets)
             {
                 var paycheckBudget = new PaycheckBudgetViewModel
                 {
-                    PaycheckBudgetId = budget.PaycheckBudgetId,
-                    PaycheckBudgetAmount = budget.PaycheckBudgetAmount,
-                    PaycheckBudgetDate = budget.PaycheckBudgetDate.ToShortDateString(),
-                    Items = new List<PaycheckBudgetItemViewModel>()
+                    Id = budget.Id,
+                    Amount = budget.Amount,
+                    Date = budget.Date.ToShortDateString(),
+                    BudgetItems = budget.BudgetItems.Select(x => new PaycheckBudgetItemViewModel
+                    {
+                        Amount = x.Amount,
+                        Description = x.Description,
+                        IsPaid = x.IsPaid,
+                        DueDate = x.DueDate.ToShortDateString()
+                    }).ToList()
                 };
 
-                foreach (var budgetItem in budget.PaycheckBudgetItems)
-                {
-                    var paycheckBudgetItem = new PaycheckBudgetItemViewModel
-                    {
-                        PaycheckBudgetId = budget.PaycheckBudgetId,
-                        PaycheckBudgetItemId = budgetItem.PaycheckBudgetItemId,
-                        Amount = budgetItem.Amount,
-                        Description = budgetItem.Description,
-                        IsPaid = budgetItem.IsPaid,
-                        PaidDate = budgetItem.PaidDate.ToShortDateString()
-                    };
-
-                    paycheckBudget.Items.Add(paycheckBudgetItem);
-                }
-
-                paycheckBudget.Remaining = paycheckBudget.PaycheckBudgetAmount - paycheckBudget.Items.Sum(pbi => pbi.Amount);
+                paycheckBudget.Remaining = paycheckBudget.Amount - paycheckBudget.BudgetItems.Sum(pbi => pbi.Amount);
                 paycheckBudgets.Add(paycheckBudget);
             }
 
@@ -57,31 +48,22 @@ namespace ExpenseTracker.Controllers
         // GET api/paycheckbudget/5
         public PaycheckBudgetViewModel Get(int id)
         {
-            var budget = _repo.FetchById(id);
+            var budget = _docSession.Load<PaycheckBudget>(id);
             var paycheckBudget = new PaycheckBudgetViewModel
             {
-                PaycheckBudgetId = budget.PaycheckBudgetId,
-                PaycheckBudgetAmount = budget.PaycheckBudgetAmount,
-                PaycheckBudgetDate = budget.PaycheckBudgetDate.ToShortDateString(),
-                Items = new List<PaycheckBudgetItemViewModel>()
+                Id = budget.Id,
+                Amount = budget.Amount,
+                Date = budget.Date.ToShortDateString(),
+                BudgetItems = budget.BudgetItems.Select(x => new PaycheckBudgetItemViewModel
+                {
+                    Amount = x.Amount,
+                    Description = x.Description,
+                    IsPaid = x.IsPaid,
+                    DueDate = x.DueDate.ToShortDateString()
+                }).ToList()
             };
 
-            foreach (var budgetItem in budget.PaycheckBudgetItems)
-            {
-                var paycheckBudgetItem = new PaycheckBudgetItemViewModel
-                {
-                    PaycheckBudgetId = budget.PaycheckBudgetId,
-                    PaycheckBudgetItemId = budgetItem.PaycheckBudgetItemId,
-                    Amount = budgetItem.Amount,
-                    Description = budgetItem.Description,
-                    IsPaid = budgetItem.IsPaid,
-                    PaidDate = budgetItem.PaidDate.ToShortDateString()
-                };
-
-                paycheckBudget.Items.Add(paycheckBudgetItem);
-            }
-
-            paycheckBudget.Remaining = paycheckBudget.PaycheckBudgetAmount - paycheckBudget.Items.Sum(pbi => pbi.Amount);
+            paycheckBudget.Remaining = paycheckBudget.Amount - paycheckBudget.BudgetItems.Sum(pbi => pbi.Amount);
 
             return paycheckBudget;
         }
@@ -91,24 +73,39 @@ namespace ExpenseTracker.Controllers
         {
             var paycheckBudget = new PaycheckBudget
             {
-                PaycheckBudgetId = budgetViewModel.PaycheckBudgetId,
-                PaycheckBudgetAmount = budgetViewModel.PaycheckBudgetAmount,
-                PaycheckBudgetDate = Convert.ToDateTime(budgetViewModel.PaycheckBudgetDate)
+                Amount = budgetViewModel.Amount,
+                Date = Convert.ToDateTime(budgetViewModel.Date),
+                BudgetItems = budgetViewModel.BudgetItems.Select(x => new PaycheckBudgetItem
+                {
+                    Amount = x.Amount,
+                    Description = x.Description,
+                    IsPaid = x.IsPaid,
+                    DueDate = Convert.ToDateTime(x.DueDate)
+                }).ToList()
             };
 
-            var paycheckBudgetItems = budgetViewModel.Items.Select(x => new PaycheckBudgetItem
+            _docSession.Store(paycheckBudget);
+            _docSession.SaveChanges();
+
+			return Get();
+        }
+
+        // PUT api/paycheckbudget/5
+        public IEnumerable<PaycheckBudgetViewModel> Put(int id, PaycheckBudgetViewModel budgetViewModel)
+        {
+            var dbBudget = _docSession.Load<PaycheckBudget>(id);
+            dbBudget.Amount = budgetViewModel.Amount;
+            dbBudget.Date = Convert.ToDateTime(budgetViewModel.Date);
+            dbBudget.BudgetItems = budgetViewModel.BudgetItems.Select(x => new PaycheckBudgetItem
             {
-                PaycheckBudgetId = x.PaycheckBudgetId,
                 Amount = x.Amount,
                 Description = x.Description,
                 IsPaid = x.IsPaid,
-                PaidDate = Convert.ToDateTime(x.PaidDate)
-            });
+                DueDate = Convert.ToDateTime(x.DueDate)
+            }).ToList();
 
-			_repo.Update(paycheckBudget);
-			_repo.UpdateAll(paycheckBudget.PaycheckBudgetId, paycheckBudgetItems);
-
-			return Get();
+            _docSession.SaveChanges();
+            return Get();
         }
 
         // DELETE api/paycheckbudget/5

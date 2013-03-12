@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Web.Http;
-using ExpenseTracker.Framework.Data;
-using ExpenseTracker.Framework.Models;
 using ExpenseTracker.Framework.ViewModels;
+using Raven.Client;
 
 namespace ExpenseTracker.Controllers
 {
     public class PaycheckBudgetItemController : ApiController
     {
-		private readonly IPaycheckBudgetRepository _repo;
+        private IDocumentSession _docSession;
 
-		public PaycheckBudgetItemController(IPaycheckBudgetRepository repo)
+		public PaycheckBudgetItemController(IDocumentSession docSession)
 		{
-			_repo = repo;
+            _docSession = docSession;
 		}
 
         // GET api/paycheckbudgetitem
@@ -36,17 +34,6 @@ namespace ExpenseTracker.Controllers
         // PUT api/paycheckbudgetitem/5
         public void Put(int id, PaycheckBudgetItemViewModel budgetItem)
         {
-			var dbBudgetItem = new PaycheckBudgetItem
-			{
-				PaycheckBudgetItemId = budgetItem.PaycheckBudgetItemId,
-				PaycheckBudgetId = budgetItem.PaycheckBudgetItemId,
-				Amount = budgetItem.Amount,
-				Description = budgetItem.Description,
-				IsPaid = budgetItem.IsPaid,
-				PaidDate = Convert.ToDateTime(budgetItem.PaidDate)
-			};
-
-			_repo.Update(dbBudgetItem);
         }
 
         // DELETE api/paycheckbudgetitem/5

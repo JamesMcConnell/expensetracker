@@ -6,7 +6,7 @@
 		<ul class="nav nav-list">
             <li class="nav-header" ng-model="selectedBudget" ng-repeat="budget in budgets">
                 <p>
-                    Paycheck for <span>{{budget.date}}</span> - <span>{{formatCurrency(budget.amount)}}</span>
+                    Paycheck for <span>{{budget.date}}</span> - <span>{{budget.amount | currency}}</span>
 		            <button class="btn-link pull-right edit-paycheck" ng-click="editBudget(budget)">Edit</button>
                 </p>
                 <table class="table table-bordered table-condensed">
@@ -21,8 +21,8 @@
 			        <tbody>
                         <tr ng-model="selectedBudgetItem" ng-repeat="budgetItem in budget.budgetItems">
 		                    <td><span>{{budgetItem.description}}</span></td>
-		                    <td><span>{{budgetItem.amount}}</span></td>
-		                    <td><span>{{budgetItem.paidDate}}</span></td>
+		                    <td><span>{{budgetItem.amount | currency}}</span></td>
+		                    <td><span>{{budgetItem.dueDate}}</span></td>
 		                    <td>
 			                    <button ng-show="!isPaid(budgetItem)" ng-click="updateStatus(budgetItem)" class="btn-link pull-right update-status" title="Mark this item as paid">Unpaid</button>
 			                    <span ng-show="isPaid(budgetItem)" style="padding: 1px 6px;" class="pull-right">Paid</span>
@@ -30,81 +30,73 @@
 	                    </tr>
                     </tbody>
 		        </table>
-                <p>Remaining: <span>{{formatCurrency(budget.remaining)}}</span></p>
+                <p>Remaining: <span>{{budget.remaining | currency}}</span></p>
                 <hr />
 	        </li>
         </ul>
 		<button class="btn btn-info btn-block btn-small" type="button" ng-click="addBudget()">Add New Paycheck</button>
-	</div>
-</div>
-<div class="span9">
-	<div class="hero-unit">
-		<h1>Hello, World</h1>
+        <div id="edit-paycheckbudget" modal="shouldBeOpen" close="close()" options="opts">
+	        <div id="edit-paycheckbudget-container">		
+		        <div class="modal-header">
+		            <h4>Edit Paycheck Budget</h4>
+	            </div>
+	            <div class="modal-body">
+		            <div class="control-group">
+			            <label class="control-label">Due Date</label>
+			            <div class="controls">
+				            <input type="text" id="PaycheckBudgetDate" placeholder="Due Date" ng-model="selectedBudget.date" value="{{selectedBudget.date}}" />
+			            </div>
+		            </div>
+		            <div class="control-group">
+			            <label class="control-label">Amount</label>
+			            <div class="controls">
+				            <input type="text" id="PaycheckBudgetAmount" placeholder="Amount" ng-model="selectedBudget.amount" value="{{selectedBudget.amount}}" />
+			            </div>
+		            </div>
+		            <div>
+			            <h4>Budget Items</h4>
+			            <table id="item-table" class="table table-bordered table-condensed">
+				            <thead>
+					            <tr>
+						            <th>Description</th>
+						            <th>Amount</th>
+						            <th>Due Date</th>
+						            <th>Paid/Unpaid</th>
+						            <th></th>
+					            </tr>
+				            </thead>
+				            <tbody>
+					            <tr ng-model="selectedBudgetItem" ng-repeat="budgetItem in selectedBudget.budgetItems">
+						            <td>
+							            <input type="text" class="input-small" ng-model="budgetItem.description" value="{{budgetItem.description}}" />
+						            </td>
+						            <td>
+							            <input type="text" class="input-small" ng-model="budgetItem.amount" value="{{budgetItem.amount}}" />
+						            </td>
+						            <td>
+							            <input type="text" class="input-small item-duedate" ng-model="budgetItem.dueDate" value="{{budgetItem.dueDate}}" />
+						            </td>
+						            <td>
+							            <input type="checkbox" class="input-small" ng-model="budgetItem.isPaid" />
+						            </td>
+						            <td>
+							            <button class="btn btn-small clear-item" ng-click="removeBudgetItem(selectedBudget, budgetItem)">Remove</button>
+						            </td>
+					            </tr>
+				            </tbody>
+			            </table>
+		            </div>
+		            <button class="btn btn-info btn-small pull-right" ng-click="addBudgetItem(selectedBudget)">Add Budget Item</button>
+	            </div>
+	            <div class="modal-footer">
+		            <button class="btn" data-dismiss="modal" aria-hidden="true" ng-click="closeModal()">Close</button>
+		            <button class="btn btn-primary" ng-click="submitData()">Save Changes</button>
+	            </div>
+	        </div>
+        </div>
 	</div>
 </div>
 
-<div id="edit-paycheckbudget-modal" ng-controller="PaycheckBudgetCtrl" ng-model="selectedBudget">
-	<div id="edit-paycheckbudget-container">		
-		<div class="modal-header">
-		    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
-		    <h4>Edit Paycheck Budget</h4>
-	    </div>
-	    <div class="modal-body">
-		    <div class="control-group">
-			    <label class="control-label">Due Date</label>
-			    <div class="controls">
-				    <input type="text" id="PaycheckBudgetDate" placeholder="Due Date" value="{{date}}" />
-			    </div>
-		    </div>
-		    <div class="control-group">
-			    <label class="control-label">Amount</label>
-			    <div class="controls">
-				    <input type="text" id="PaycheckBudgetAmount" placeholder="Amount" value="{{amount}}" />
-			    </div>
-		    </div>
-		    <div>
-			    <h4>Budget Items</h4>
-			    <table id="item-table" class="table table-bordered table-condensed">
-				    <thead>
-					    <tr>
-						    <th>Description</th>
-						    <th>Amount</th>
-						    <th>Due Date</th>
-						    <th>Paid/Unpaid</th>
-						    <th></th>
-					    </tr>
-				    </thead>
-				    <tbody>
-					    <tr ng-model="selectedBudgetItem" ng-repeat="budgetItem in budgetItems">
-						    <td>
-							    <input type="text" class="input-small" value="{{description}}" />
-						    </td>
-						    <td>
-							    <input type="text" class="input-small" value="{{amount}}" />
-						    </td>
-						    <td>
-							    <input type="text" class="input-small item-duedate" value="{{paidDate}}" />
-						    </td>
-						    <td>
-							    <input type="checkbox" class="input-small" value="{{isPaid}}" />
-						    </td>
-						    <td>
-							    <input type="hidden" id="budgetId" value="{{budgetId}}" />
-							    <input type="hidden" id="budgetItemId" value="{{budgetItemId}}" />
-							    <button class="btn btn-small clear-item">Remove</button>
-						    </td>
-					    </tr>
-				    </tbody>
-			    </table>
-		    </div>
-		    <button class="btn btn-info btn-small pull-right" ng-click="addBudgetItem()">Add Budget Item</button>
-	    </div>
-	    <div class="modal-footer">
-		    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-		    <button class="btn btn-primary" ng-click="submitData()">Save Changes</button>
-	    </div>
-	</div>
-</div>
 @section Scripts {
 	
 }

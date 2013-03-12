@@ -11,10 +11,9 @@ namespace ExpenseTracker.App_Start
     using Ninject;
     using Ninject.Web.Common;
 
-	using ExpenseTracker.Framework.Data;
-	using ExpenseTracker.Framework.Data.Concrete;
 	using System.Web.Http;
 	using Ninject.Web.Mvc;
+    using Modules;
 
     public static class NinjectWebCommon 
     {
@@ -61,7 +60,7 @@ namespace ExpenseTracker.App_Start
         /// <param name="kernel">The kernel.</param>
         private static void RegisterServices(IKernel kernel)
         {
-			kernel.Bind<IPaycheckBudgetRepository>().To<PaycheckBudgetRepository>().InRequestScope();
+            kernel.Load(new RavenModule());
         }        
     }
 }

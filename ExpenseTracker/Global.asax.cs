@@ -6,6 +6,9 @@ using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using Raven.Client.Document;
+using Raven.Client.Indexes;
+using System.Reflection;
 
 namespace ExpenseTracker
 {
@@ -14,6 +17,8 @@ namespace ExpenseTracker
 
 	public class MvcApplication : System.Web.HttpApplication
 	{
+        public static DocumentStore DocStore;
+
 		protected void Application_Start()
 		{
 			AreaRegistration.RegisterAllAreas();

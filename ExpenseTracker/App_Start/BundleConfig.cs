@@ -22,7 +22,8 @@ namespace ExpenseTracker
                         "~/Scripts/bootstrap.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/angular").Include(
-                        "~/Scripts/angular.js"));
+                        "~/Scripts/angular.js",
+                        "~/Scripts/ui-bootstrap-0.2.0.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/static").Include(
                         "~/Scripts/app.js",

@@ -10,16 +10,16 @@ namespace ExpenseTracker.Framework.ViewModels
 	public class PaycheckBudgetViewModel
 	{
 		[DataMember(Name = "id")]
-		public int PaycheckBudgetId { get; set; }
+		public int Id { get; set; }
 
 		[DataMember(Name = "date")]
-		public string PaycheckBudgetDate { get; set; }
+		public string Date { get; set; }
 
 		[DataMember(Name = "amount")]
-		public decimal PaycheckBudgetAmount { get; set; }
+		public decimal Amount { get; set; }
 
 		[DataMember(Name = "budgetItems")]
-		public List<PaycheckBudgetItemViewModel> Items { get; set; }
+		public List<PaycheckBudgetItemViewModel> BudgetItems { get; set; }
 
 		[DataMember(Name = "remaining")]
 		public decimal Remaining { get; set; }
@@ -28,20 +28,14 @@ namespace ExpenseTracker.Framework.ViewModels
 	[DataContract]
 	public class PaycheckBudgetItemViewModel
 	{
-		[DataMember(Name = "itemId")]
-		public int PaycheckBudgetItemId { get; set; }
-
-        [DataMember(Name = "budgetId")]
-        public int PaycheckBudgetId { get; set; }
-
 		[DataMember(Name = "description")]
 		public string Description { get; set; }
 
 		[DataMember(Name = "amount")]
 		public decimal Amount { get; set; }
 
-		[DataMember(Name = "paidDate")]
-		public string PaidDate { get; set; }
+		[DataMember(Name = "dueDate")]
+		public string DueDate { get; set; }
 
 		[DataMember(Name = "isPaid")]
 		public bool IsPaid { get; set; }
