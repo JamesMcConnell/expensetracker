@@ -1,14 +1,49 @@
-﻿angular.module('expenseTracker', ['ui', 'ui.bootstrap']);
+﻿function copyBudget(budget) {
+    var budgetCopy = {
+        id: budget.id,
+        date: budget.date,
+        amount: budget.amount,
+        budgetItems: new Array()
+    };
+
+    for (var i = 0; i < budget.budgetItems.length; i++) {
+        budgetCopy.budgetItems.push({
+            description: budget.budgetItems[i].description,
+            amount: budget.budgetItems[i].amount,
+            dueDate: budget.budgetItems[i].dueDate,
+            isPaid: budget.budgetItems[i].isPaid
+        });
+    }
+
+    return budgetCopy;
+}
+
+var app = angular.module('expenseTracker', ['ui.bootstrap']);
+app.directive('datepicker', function ($parse) {
+    return function (scope, element, attrs, controller) {
+        var ngModel = $parse(attrs.ngModel);
+        $(function () {
+            element.datepicker({
+                dateFormat: 'MM dd, yy',
+                onSelect: function (dateText, inst) {
+                    scope.$apply(function (scope) {
+                        ngModel.assign(scope, dateText);
+                    });
+                }
+            });
+        });
+    }
+});
 var PaycheckBudgetCtrl = function ($scope, $http) {
     $http({ method: 'GET', url: 'api/paycheckbudget' }).success(function (data, status) {
         $scope.budgets = data;
-        $scope.viewingLedger = true;
-        $scope.viewingArchive = false;
     });
+
+    $scope.selectedBudget = undefined;
 
     /** Click events **/
     $scope.editBudget = function (budget) {
-        $scope.selectedBudget = budget;
+        $scope.selectedBudget = copyBudget(budget);
         $scope.shouldBeOpen = true;
         $scope.isEditing = true;
     };
@@ -44,7 +79,7 @@ var PaycheckBudgetCtrl = function ($scope, $http) {
     };
 
     $scope.pageNext = function () {
-
+        var lastBudget = $scope.budgets[$scope.budgets.length - 1];
     };
 
     /** Click events **/

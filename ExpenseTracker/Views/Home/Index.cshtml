@@ -35,7 +35,7 @@
                         <tr ng-model="selectedBudgetItem" ng-repeat="budgetItem in budget.budgetItems">
 		                    <td><span>{{budgetItem.description}}</span></td>
 		                    <td><span>{{budgetItem.amount | currency}}</span></td>
-		                    <td><span>{{budgetItem.dueDate}}</span></td>
+		                    <td><span>{{budgetItem.dueDate | date: 'longDate'}}</span></td>
 		                    <td>
 			                    <button ng-show="!isPaid(budgetItem)" ng-click="updateStatus(budget, budgetItem)" class="btn-link pull-right update-status" title="Mark this item as paid">Unpaid</button>
 			                    <span ng-show="isPaid(budgetItem)" style="padding: 1px 6px;" class="pull-right">Paid</span>
@@ -56,7 +56,7 @@
 		            <div class="control-group">
 			            <label class="control-label">Due Date</label>
 			            <div class="controls">
-				            <input type="text" id="PaycheckBudgetDate" placeholder="Due Date" ng-model="selectedBudget.date" value="{{selectedBudget.date | date: 'longDate'}}" ui-date />
+				            <input type="text" id="PaycheckBudgetDate" placeholder="Due Date" ng-model="selectedBudget.date" datepicker value="{{selectedBudget.date | date: 'longDate'}}" />
 			            </div>
 		            </div>
 		            <div class="control-group">
@@ -86,7 +86,7 @@
 							            <input type="text" class="input-small" ng-model="budgetItem.amount" value="{{budgetItem.amount}}" />
 						            </td>
 						            <td>
-							            <input type="text" class="input-small item-duedate" ng-model="budgetItem.dueDate" value="{{budgetItem.dueDate | date: 'longDate'}}" ui-date />
+							            <input type="text" class="input-small item-duedate" ng-model="budgetItem.dueDate" datepicker value="{{budgetItem.dueDate | date: 'longDate'}}" />
 						            </td>
 						            <td>
 							            <input type="checkbox" class="input-small" ng-model="budgetItem.isPaid" />
