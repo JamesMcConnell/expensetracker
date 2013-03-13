@@ -2,3 +2,16 @@
 {
 	color: Red;
 }
+
+.pager-container {
+}
+
+.pager-container .pager {
+    padding-left: 15px;
+    padding-right: 15px;
+    margin: 10px 0 !important;
+}
+
+.pager-container .pager button {
+    margin-top: 4px;
+}

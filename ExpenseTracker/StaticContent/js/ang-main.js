@@ -1,9 +1,12 @@
-﻿angular.module('expenseTracker', ['ui.bootstrap']);
+﻿angular.module('expenseTracker', ['ui', 'ui.bootstrap']);
 var PaycheckBudgetCtrl = function ($scope, $http) {
     $http({ method: 'GET', url: 'api/paycheckbudget' }).success(function (data, status) {
         $scope.budgets = data;
+        $scope.viewingLedger = true;
+        $scope.viewingArchive = false;
     });
 
+    /** Click events **/
     $scope.editBudget = function (budget) {
         $scope.selectedBudget = budget;
         $scope.shouldBeOpen = true;
@@ -29,9 +32,22 @@ var PaycheckBudgetCtrl = function ($scope, $http) {
         }
     };
 
-    $scope.updateStatus = function (budgetItem) {
-        console.log(budgetItem);
+    $scope.updateStatus = function (budget, budgetItem) {
+        budgetItem.isPaid = true;
+        $scope.isEditing = true;
+        $scope.submitData(budget);
     };
+
+    $scope.pagePrevious = function () {
+        var firstBudget = $scope.budgets[0];
+
+    };
+
+    $scope.pageNext = function () {
+
+    };
+
+    /** Click events **/
 
     $scope.isPaid = function (budgetItem) {
         return budgetItem.isPaid;
@@ -41,13 +57,13 @@ var PaycheckBudgetCtrl = function ($scope, $http) {
         $scope.shouldBeOpen = false;
     };
 
-    $scope.submitData = function () {
+    $scope.submitData = function (budget) {
         if (!$scope.isEditing) {
-            $http.post('api/paycheckbudget', $scope.selectedBudget).success(function (data, status) {
+            $http.post('api/paycheckbudget', budget).success(function (data, status) {
                 $scope.budgets = data;
             });
         } else {
-            $http.put('api/paycheckbudget/' + $scope.selectedBudget.id, $scope.selectedBudget).success(function (data, status) {
+            $http.put('api/paycheckbudget/' + budget.id, budget).success(function (data, status) {
                 $scope.budgets = data;
             });
         }

@@ -20,7 +20,7 @@ namespace ExpenseTracker.Controllers
         // GET api/paycheckbudget
         public IEnumerable<PaycheckBudgetViewModel> Get()
         {
-            var allBudgets = _docSession.Query<PaycheckBudget>().ToList();
+            var allBudgets = _docSession.Query<PaycheckBudget>().ToList().OrderBy(pb => pb.Date);
             List<PaycheckBudgetViewModel> paycheckBudgets = new List<PaycheckBudgetViewModel>();
             foreach (var budget in allBudgets)
             {
@@ -28,13 +28,13 @@ namespace ExpenseTracker.Controllers
                 {
                     Id = budget.Id,
                     Amount = budget.Amount,
-                    Date = budget.Date.ToShortDateString(),
+                    Date = budget.Date,
                     BudgetItems = budget.BudgetItems.Select(x => new PaycheckBudgetItemViewModel
                     {
                         Amount = x.Amount,
                         Description = x.Description,
                         IsPaid = x.IsPaid,
-                        DueDate = x.DueDate.ToShortDateString()
+                        DueDate = x.DueDate
                     }).ToList()
                 };
 
@@ -53,13 +53,13 @@ namespace ExpenseTracker.Controllers
             {
                 Id = budget.Id,
                 Amount = budget.Amount,
-                Date = budget.Date.ToShortDateString(),
+                Date = budget.Date,
                 BudgetItems = budget.BudgetItems.Select(x => new PaycheckBudgetItemViewModel
                 {
                     Amount = x.Amount,
                     Description = x.Description,
                     IsPaid = x.IsPaid,
-                    DueDate = x.DueDate.ToShortDateString()
+                    DueDate = x.DueDate
                 }).ToList()
             };
 
@@ -74,13 +74,13 @@ namespace ExpenseTracker.Controllers
             var paycheckBudget = new PaycheckBudget
             {
                 Amount = budgetViewModel.Amount,
-                Date = Convert.ToDateTime(budgetViewModel.Date),
+                Date = budgetViewModel.Date,
                 BudgetItems = budgetViewModel.BudgetItems.Select(x => new PaycheckBudgetItem
                 {
                     Amount = x.Amount,
                     Description = x.Description,
                     IsPaid = x.IsPaid,
-                    DueDate = Convert.ToDateTime(x.DueDate)
+                    DueDate = x.DueDate
                 }).ToList()
             };
 
@@ -95,13 +95,13 @@ namespace ExpenseTracker.Controllers
         {
             var dbBudget = _docSession.Load<PaycheckBudget>(id);
             dbBudget.Amount = budgetViewModel.Amount;
-            dbBudget.Date = Convert.ToDateTime(budgetViewModel.Date);
+            dbBudget.Date = budgetViewModel.Date;
             dbBudget.BudgetItems = budgetViewModel.BudgetItems.Select(x => new PaycheckBudgetItem
             {
                 Amount = x.Amount,
                 Description = x.Description,
                 IsPaid = x.IsPaid,
-                DueDate = Convert.ToDateTime(x.DueDate)
+                DueDate = x.DueDate
             }).ToList();
 
             _docSession.SaveChanges();

@@ -13,7 +13,7 @@ namespace ExpenseTracker.Framework.ViewModels
 		public int Id { get; set; }
 
 		[DataMember(Name = "date")]
-		public string Date { get; set; }
+		public DateTime Date { get; set; }
 
 		[DataMember(Name = "amount")]
 		public decimal Amount { get; set; }
@@ -35,7 +35,7 @@ namespace ExpenseTracker.Framework.ViewModels
 		public decimal Amount { get; set; }
 
 		[DataMember(Name = "dueDate")]
-		public string DueDate { get; set; }
+		public DateTime DueDate { get; set; }
 
 		[DataMember(Name = "isPaid")]
 		public bool IsPaid { get; set; }

@@ -3,10 +3,23 @@
 }
 <div class="span3">
 	<div id="budget-list-container" class="well sidebar-nav" ng-controller="PaycheckBudgetCtrl">
+        <div class="pager-container">
+            <ul class="pager">
+                <li class="previous">
+                    <a href="#" ng-click="pagePrevious()">&larr; Older</a>
+                </li>
+                <li>
+                    <button class="btn btn-info btn-small" type="button" ng-click="addBudget()">Add New Paycheck</button>
+                </li>
+                <li class="next">
+                    <a href="#" ng-click="pageNext()">Newer &rarr;</a>
+                </li>
+            </ul>
+        </div>
 		<ul class="nav nav-list">
             <li class="nav-header" ng-model="selectedBudget" ng-repeat="budget in budgets">
                 <p>
-                    Paycheck for <span>{{budget.date}}</span> - <span>{{budget.amount | currency}}</span>
+                    Paycheck for <span>{{budget.date | date: 'longDate'}}</span> - <span>{{budget.amount | currency}}</span>
 		            <button class="btn-link pull-right edit-paycheck" ng-click="editBudget(budget)">Edit</button>
                 </p>
                 <table class="table table-bordered table-condensed">
@@ -24,7 +37,7 @@
 		                    <td><span>{{budgetItem.amount | currency}}</span></td>
 		                    <td><span>{{budgetItem.dueDate}}</span></td>
 		                    <td>
-			                    <button ng-show="!isPaid(budgetItem)" ng-click="updateStatus(budgetItem)" class="btn-link pull-right update-status" title="Mark this item as paid">Unpaid</button>
+			                    <button ng-show="!isPaid(budgetItem)" ng-click="updateStatus(budget, budgetItem)" class="btn-link pull-right update-status" title="Mark this item as paid">Unpaid</button>
 			                    <span ng-show="isPaid(budgetItem)" style="padding: 1px 6px;" class="pull-right">Paid</span>
 		                    </td>
 	                    </tr>
@@ -34,7 +47,6 @@
                 <hr />
 	        </li>
         </ul>
-		<button class="btn btn-info btn-block btn-small" type="button" ng-click="addBudget()">Add New Paycheck</button>
         <div id="edit-paycheckbudget" modal="shouldBeOpen" close="close()" options="opts">
 	        <div id="edit-paycheckbudget-container">		
 		        <div class="modal-header">
@@ -44,7 +56,7 @@
 		            <div class="control-group">
 			            <label class="control-label">Due Date</label>
 			            <div class="controls">
-				            <input type="text" id="PaycheckBudgetDate" placeholder="Due Date" ng-model="selectedBudget.date" value="{{selectedBudget.date}}" />
+				            <input type="text" id="PaycheckBudgetDate" placeholder="Due Date" ng-model="selectedBudget.date" value="{{selectedBudget.date | date: 'longDate'}}" ui-date />
 			            </div>
 		            </div>
 		            <div class="control-group">
@@ -74,7 +86,7 @@
 							            <input type="text" class="input-small" ng-model="budgetItem.amount" value="{{budgetItem.amount}}" />
 						            </td>
 						            <td>
-							            <input type="text" class="input-small item-duedate" ng-model="budgetItem.dueDate" value="{{budgetItem.dueDate}}" />
+							            <input type="text" class="input-small item-duedate" ng-model="budgetItem.dueDate" value="{{budgetItem.dueDate | date: 'longDate'}}" ui-date />
 						            </td>
 						            <td>
 							            <input type="checkbox" class="input-small" ng-model="budgetItem.isPaid" />
@@ -90,13 +102,16 @@
 	            </div>
 	            <div class="modal-footer">
 		            <button class="btn" data-dismiss="modal" aria-hidden="true" ng-click="closeModal()">Close</button>
-		            <button class="btn btn-primary" ng-click="submitData()">Save Changes</button>
+		            <button class="btn btn-primary" ng-click="submitData(selectedBudget)">Save Changes</button>
 	            </div>
 	        </div>
         </div>
 	</div>
 </div>
+<div class="span9">
+    <div class="well"></div>
+</div>
 
 @section Scripts {
-	
+    
 }

@@ -25,6 +25,12 @@
 			<div class="navbar-inner">
 				<div class="container-fluid">
 					@Html.ActionLink("Expense Tracker", "Index", "Home", null, new { @class = "brand" })
+                    <div class="nav-collapse collapse">
+						<ul class="nav">
+							<li>@Html.ActionLink("Archive", "Archive", "Home")</li>
+							<li>@Html.ActionLink("Recurring Bills", "Recurring", "Home")</li>
+						</ul>
+					</div>
 				</div>
 			</div>
 		</div>
