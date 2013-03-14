@@ -6,6 +6,9 @@
         <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         @Styles.Render("~/Content/css")
+        @Styles.Render("~/Content/bootstrap")
+        @Styles.Render("~/Content/angularui")
+        @Styles.Render("~/Content/plugins")
 		@Styles.Render("~/Content/themes/base/css")
         @Scripts.Render("~/bundles/modernizr")
 		<style type="text/css">
@@ -44,6 +47,7 @@
 		@Scripts.Render("~/bundles/jqueryui")
 		@Scripts.Render("~/bundles/twitterbootstrap")
         @Scripts.Render("~/bundles/angular")
+        @Scripts.Render("~/bundles/plugins")
         @Scripts.Render("~/bundles/static")
 
         @RenderSection("scripts", required: false)

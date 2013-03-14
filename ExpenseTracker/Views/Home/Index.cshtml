@@ -35,7 +35,7 @@
                         <tr ng-model="selectedBudgetItem" ng-repeat="budgetItem in budget.budgetItems">
 		                    <td><span>{{budgetItem.description}}</span></td>
 		                    <td><span>{{budgetItem.amount | currency}}</span></td>
-		                    <td><span>{{budgetItem.dueDate | date: 'longDate'}}</span></td>
+		                    <td><span>{{budgetItem.dueDate | date: 'mediumDate'}}</span></td>
 		                    <td>
 			                    <button ng-show="!isPaid(budgetItem)" ng-click="updateStatus(budget, budgetItem)" class="btn-link pull-right update-status" title="Mark this item as paid">Unpaid</button>
 			                    <span ng-show="isPaid(budgetItem)" style="padding: 1px 6px;" class="pull-right">Paid</span>
@@ -86,7 +86,7 @@
 							            <input type="text" class="input-small" ng-model="budgetItem.amount" value="{{budgetItem.amount}}" />
 						            </td>
 						            <td>
-							            <input type="text" class="input-small item-duedate" ng-model="budgetItem.dueDate" datepicker value="{{budgetItem.dueDate | date: 'longDate'}}" />
+							            <input type="text" class="input-medium item-duedate" ng-model="budgetItem.dueDate" datepicker value="{{budgetItem.dueDate | date: 'longDate'}}" />
 						            </td>
 						            <td>
 							            <input type="checkbox" class="input-small" ng-model="budgetItem.isPaid" />
@@ -109,7 +109,9 @@
 	</div>
 </div>
 <div class="span9">
-    <div class="well"></div>
+    <div class="well" ng-controller="CalendarCtrl">
+        <div pb-calendar="{ height: 450, editable: true }" class="calendar" ng-model="events"></div>
+    </div>
 </div>
 
 @section Scripts {

@@ -1,4 +1,11 @@
-﻿function copyBudget(budget) {
+﻿var defaultBudget = {
+    id: null,
+    date: null,
+    amount: null,
+    budgetItems: new Array()
+};
+
+function copyBudget(budget) {
     var budgetCopy = {
         id: budget.id,
         date: budget.date,
@@ -18,7 +25,7 @@
     return budgetCopy;
 }
 
-var app = angular.module('expenseTracker', ['ui.bootstrap']);
+var app = angular.module('expenseTracker', ['ui', 'ui.bootstrap']);
 app.directive('datepicker', function ($parse) {
     return function (scope, element, attrs, controller) {
         var ngModel = $parse(attrs.ngModel);
@@ -34,12 +41,106 @@ app.directive('datepicker', function ($parse) {
         });
     }
 });
-var PaycheckBudgetCtrl = function ($scope, $http) {
+
+app.directive('pbCalendar', function ($parse) {
+    return {
+        require: 'ngModel',
+        restrict: 'A',
+        link: function (scope, element, attrs) {
+            var sources = scope.$eval(attrs.ngModel);
+            var tracker = 0;
+            var getSources = function () {
+                var equalsTracker = scope.$eval(attrs.equalsTracker);
+                tracker = 0;
+                angular.forEach(sources, function (value, key) {
+                    if (angular.isArray(value)) {
+                        tracker += value.length;
+                    }
+                });
+                if (angular.isNumber(equalsTracker)) {
+                    return tracker + sources.length + equalsTracker;
+                } else {
+                    return tracker + sources.length;
+                }
+            };
+            function update() {
+                scope.calendar = element.html('');
+                var view = scope.calendar.fullCalendar('getView');
+                if (view) {
+                    view = view.name;
+                }
+
+                var expression, options = { defaultView: view, events: sources };
+                if (attrs.pbCalendar) {
+                    expression = scope.$eval(attrs.uiCalendar);
+                }
+                else {
+                    expression = {};
+                }
+                angular.extend(options, {}, expression);
+                scope.calendar.fullCalendar(options);
+            }
+            update();
+            scope.$watch(getSources, function (newVal, oldVal) {
+                update();
+            });
+        }
+    };
+});
+
+app.factory('paycheckBudgetService', function ($rootScope, $http) {
+    var service = {};
+    service.currentBudget = {};
+
+    service.prepForBroadcast = function (budget) {
+        this.currentBudget = budget;
+        this.broadcastItem();
+    };
+
+    service.broadcastItem = function () {
+        $rootScope.$broadcast('paycheckBudgetSelected');
+    };
+
+    return service;
+});
+
+var CalendarCtrl = function ($scope, pbService) {
+    var date = new Date();
+    var d = date.getDate();
+    var m = date.getMonth();
+    var y = date.getFullYear();
+
+    $scope.events = [];
+
+    $scope.$on('paycheckBudgetSelected', function () {
+        $scope.events.push({
+            title: 'Payday - ' + pbService.currentBudget.amount,
+            allDay: true,
+            start: pbService.currentBudget.date,
+            editable: false,
+            textColor: '#3a87ad',
+            backgroundColor: '#d9edf7',
+            borderColor: '#bce8f1'
+        });
+
+        angular.forEach(pbService.currentBudget.budgetItems, function (value, key) {
+            $scope.events.push({
+                title: value.description + ' - ' + value.amount,
+                allDay: true,
+                start: value.dueDate,
+                editable: false
+            });
+        });
+    });
+}
+
+var PaycheckBudgetCtrl = function ($scope, $http, pbService) {
+    $scope.selectedBudget = undefined;
+
     $http({ method: 'GET', url: 'api/paycheckbudget' }).success(function (data, status) {
         $scope.budgets = data;
+        pbService.prepForBroadcast($scope.budgets[0]);
     });
-
-    $scope.selectedBudget = undefined;
 
     /** Click events **/
     $scope.editBudget = function (budget) {
@@ -111,40 +212,5 @@ var PaycheckBudgetCtrl = function ($scope, $http) {
     };
 }
 
-var defaultBudget = {
-    id: null,
-    date: null,
-    amount: null,
-    budgetItems: new Array()
-};
-
-//    $scope.budgets = [{
-//        id: 1,
-//        date: "3/1/2013",
-//        amount: 2350,
-//        budgetItems: [{
-//            itemId: 1,
-//            budgetId: 1,
-//            description: "Home Choice",
-//            amount: 100,
-//            paidDate: "3/5/2013",
-//            isPaid: false
-//        },
-//        {
-//            itemId: 3,
-//            budgetId: 1,
-//            description: "Bug's Tuition",
-//            amount: 275,
-//            paidDate: "3/5/2013",
-//            isPaid: false
-//        },
-//        {
-//            itemId: 4,
-//            budgetId: 1,
-//            description: "Rent",
-//            amount: 800,
-//            paidDate: "3/5/2013",
-//            isPaid: true
-//        }],
-//        remaining: 1175
-//    }];
+PaycheckBudgetCtrl.$inject = ['$scope', '$http', 'paycheckBudgetService'];
+CalendarCtrl.$inject = ['$scope', 'paycheckBudgetService'];

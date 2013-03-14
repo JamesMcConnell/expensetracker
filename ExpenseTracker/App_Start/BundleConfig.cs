@@ -9,25 +9,26 @@ namespace ExpenseTracker
 		public static void RegisterBundles(BundleCollection bundles)
 		{
 			bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
-						"~/Scripts/jquery-{version}.js"));
+						"~/Scripts/jquery/jquery-{version}.js"));
 
 			bundles.Add(new ScriptBundle("~/bundles/jqueryui").Include(
-						"~/Scripts/jquery-ui-{version}.js"));
+						"~/Scripts/jquery/jquery-ui-{version}.js"));
 
 			bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
-						"~/Scripts/jquery.unobtrusive*",
-						"~/Scripts/jquery.validate*"));
+						"~/Scripts/jquery/jquery.unobtrusive*",
+						"~/Scripts/jquery/jquery.validate*"));
 
 			bundles.Add(new ScriptBundle("~/bundles/twitterbootstrap").Include(
                         "~/Scripts/bootstrap.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/angular").Include(
-                        "~/Scripts/angular.js",
-                        "~/Scripts/angular-ui.js",
-                        "~/Scripts/ui-bootstrap-0.2.0.js"));
+                        "~/Scripts/angular/angular.js",
+                        "~/Scripts/angular/angular-ui.js",
+                        "~/Scripts/angular/ui-bootstrap-0.2.0.js"));
+
+            bundles.Add(new ScriptBundle("~/bundles/plugins").Include("~/Scripts/fullcalendar.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/static").Include(
-                        "~/Scripts/app.js",
                         "~/StaticContent/js/ang-main.js"));
 
 			// Use the development version of Modernizr to develop with and learn from. Then, when you're
@@ -35,7 +36,13 @@ namespace ExpenseTracker
 			bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
 						"~/Scripts/modernizr-*"));
 
-			bundles.Add(new StyleBundle("~/Content/css").Include("~/Content/bootstrap.css", "~/Content/bootstrap-responsive.css", "~/Content/Site.css", "~/Content/angular-ui.css"));
+			bundles.Add(new StyleBundle("~/Content/css").Include("~/Content/Site.css"));
+
+            bundles.Add(new StyleBundle("~/Content/bootstrap").Include("~/Content/bootstrap.css", "~/Content/bootstrap-responsive.css"));
+
+            bundles.Add(new StyleBundle("~/Content/angularui").Include("~/Content/angular-ui.css"));
+
+            bundles.Add(new StyleBundle("~/Content/plugins").Include("~/Content/fullcalendar.css"));
 
 			bundles.Add(new StyleBundle("~/Content/themes/base/css").Include(
 						"~/Content/themes/base/jquery.ui.core.css",

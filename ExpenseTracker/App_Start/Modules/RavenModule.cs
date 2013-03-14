@@ -2,8 +2,6 @@
 using Ninject.Modules;
 using Ninject.Web.Common;
 using Raven.Client;
-using Raven.Client.Embedded;
-using Raven.Database.Server;
 using Raven.Client.Document;
 
 namespace ExpenseTracker.App_Start.Modules
