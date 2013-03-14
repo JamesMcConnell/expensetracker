@@ -47,6 +47,14 @@ app.directive('pbCalendar', function ($parse) {
         require: 'ngModel',
         restrict: 'A',
         link: function (scope, element, attrs) {
+            var baseOptions = {
+                theme: true,
+                header: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'month,agendaWeek,agendaDay'
+                }
+            };
             var sources = scope.$eval(attrs.ngModel);
             var tracker = 0;
             var getSources = function () {
@@ -77,7 +85,7 @@ app.directive('pbCalendar', function ($parse) {
                 else {
                     expression = {};
                 }
-                angular.extend(options, {}, expression);
+                angular.extend(options, baseOptions, expression);
                 scope.calendar.fullCalendar(options);
             }
             update();
