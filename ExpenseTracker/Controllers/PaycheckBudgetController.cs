@@ -34,7 +34,8 @@ namespace ExpenseTracker.Controllers
                         Amount = x.Amount,
                         Description = x.Description,
                         IsPaid = x.IsPaid,
-                        DueDate = x.DueDate
+                        DueDate = x.DueDate,
+                        DatePaid = x.DatePaid
                     }).ToList()
                 };
 
@@ -59,7 +60,8 @@ namespace ExpenseTracker.Controllers
                     Amount = x.Amount,
                     Description = x.Description,
                     IsPaid = x.IsPaid,
-                    DueDate = x.DueDate
+                    DueDate = x.DueDate,
+                    DatePaid = x.DatePaid
                 }).ToList()
             };
 
@@ -69,7 +71,7 @@ namespace ExpenseTracker.Controllers
         }
 
         // POST api/paycheckbudget
-        public IEnumerable<PaycheckBudgetViewModel> Post(PaycheckBudgetViewModel budgetViewModel)
+        public void Post(PaycheckBudgetViewModel budgetViewModel)
         {
             var paycheckBudget = new PaycheckBudget
             {
@@ -80,18 +82,17 @@ namespace ExpenseTracker.Controllers
                     Amount = x.Amount,
                     Description = x.Description,
                     IsPaid = x.IsPaid,
-                    DueDate = x.DueDate
+                    DueDate = x.DueDate,
+                    DatePaid = x.DatePaid
                 }).ToList()
             };
 
             _docSession.Store(paycheckBudget);
             _docSession.SaveChanges();
-
-			return Get();
         }
 
         // PUT api/paycheckbudget/5
-        public IEnumerable<PaycheckBudgetViewModel> Put(int id, PaycheckBudgetViewModel budgetViewModel)
+        public void Put(int id, PaycheckBudgetViewModel budgetViewModel)
         {
             var dbBudget = _docSession.Load<PaycheckBudget>(id);
             dbBudget.Amount = budgetViewModel.Amount;
@@ -101,11 +102,11 @@ namespace ExpenseTracker.Controllers
                 Amount = x.Amount,
                 Description = x.Description,
                 IsPaid = x.IsPaid,
-                DueDate = x.DueDate
+                DueDate = x.DueDate,
+                DatePaid = x.DatePaid
             }).ToList();
 
             _docSession.SaveChanges();
-            return Get();
         }
 
         // DELETE api/paycheckbudget/5

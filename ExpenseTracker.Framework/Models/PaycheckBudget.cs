@@ -18,5 +18,6 @@ namespace ExpenseTracker.Framework.Models
         public decimal Amount { get; set; }
         public bool IsPaid { get; set; }
         public string Description { get; set; }
+        public DateTime DatePaid { get; set; }
     }
 }

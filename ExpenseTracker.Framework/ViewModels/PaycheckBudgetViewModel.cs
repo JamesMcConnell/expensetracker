@@ -39,5 +39,8 @@ namespace ExpenseTracker.Framework.ViewModels
 
 		[DataMember(Name = "isPaid")]
 		public bool IsPaid { get; set; }
+
+        [DataMember(Name = "datePaid")]
+        public DateTime DatePaid { get; set; }
 	}
 }

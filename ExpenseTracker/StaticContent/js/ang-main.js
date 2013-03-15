@@ -1,11 +1,4 @@
-﻿var defaultBudget = {
-    id: null,
-    date: null,
-    amount: null,
-    budgetItems: new Array()
-};
-
-function copyBudget(budget) {
+﻿function copyBudget(budget) {
     var budgetCopy = {
         id: budget.id,
         date: budget.date,
@@ -18,7 +11,8 @@ function copyBudget(budget) {
             description: budget.budgetItems[i].description,
             amount: budget.budgetItems[i].amount,
             dueDate: budget.budgetItems[i].dueDate,
-            isPaid: budget.budgetItems[i].isPaid
+            isPaid: budget.budgetItems[i].isPaid,
+            datePaid: budget.budgetItems[i].datePaid
         });
     }
 
@@ -98,45 +92,61 @@ app.directive('pbCalendar', function ($parse) {
 
 app.factory('paycheckBudgetService', function ($rootScope, $http) {
     var service = {};
-    service.currentBudget = {};
+    service.budgets = [];
 
-    service.prepForBroadcast = function (budget) {
-        this.currentBudget = budget;
+    service.prepForBroadcast = function (budgets) {
+        this.budgets = budgets;
         this.broadcastItem();
     };
 
     service.broadcastItem = function () {
-        $rootScope.$broadcast('paycheckBudgetSelected');
+        $rootScope.$broadcast('budgetsLoaded');
     };
 
     return service;
 });
 
 var CalendarCtrl = function ($scope, pbService) {
-    var date = new Date();
-    var d = date.getDate();
-    var m = date.getMonth();
-    var y = date.getFullYear();
-
     $scope.events = [];
-
-    $scope.$on('paycheckBudgetSelected', function () {
-        $scope.events.push({
-            title: 'Payday - ' + pbService.currentBudget.amount,
-            allDay: true,
-            start: pbService.currentBudget.date,
-            editable: false,
-            textColor: '#3a87ad',
-            backgroundColor: '#d9edf7',
-            borderColor: '#bce8f1'
+    $scope.eventExists = function (newEvent) {
+        angular.forEach($scope.events, function (value, key) {
+            if (value.title == newEvent.title) {
+                return true;
+            }
         });
 
-        angular.forEach(pbService.currentBudget.budgetItems, function (value, key) {
-            $scope.events.push({
-                title: value.description + ' - ' + value.amount,
+        return false;
+    };
+
+    $scope.$on('budgetsLoaded', function () {
+        angular.forEach(pbService.budgets, function (budget, key) {
+            var paydayEvent = {
+                title: 'Payday - ' + budget.amount,
                 allDay: true,
-                start: value.dueDate,
-                editable: false
+                start: budget.date,
+                editable: false,
+                textColor: '#3a87ad',
+                backgroundColor: '#d9edf7',
+                borderColor: '#bce8f1'
+            };
+
+            var paydayEventExists = $scope.eventExists(paydayEvent);
+            if (!paydayEventExists) {
+                $scope.events.push(paydayEvent);
+            }
+
+            angular.forEach(budget.budgetItems, function (budgetItem, key) {
+                var itemEvent = {
+                    title: budgetItem.description + ' - ' + budgetItem.amount,
+                    allDay: true,
+                    start: budgetItem.dueDate,
+                    editable: false
+                };
+
+                var itemEventExists = $scope.eventExists(itemEvent);
+                if (!itemEventExists) {
+                    $scope.events.push(itemEvent);
+                }
             });
         });
     });
@@ -144,10 +154,14 @@ var CalendarCtrl = function ($scope, pbService) {
 
 var PaycheckBudgetCtrl = function ($scope, $http, pbService) {
     $scope.selectedBudget = undefined;
+    $scope.hasData = false;
 
     $http({ method: 'GET', url: 'api/paycheckbudget' }).success(function (data, status) {
         $scope.budgets = data;
-        pbService.prepForBroadcast($scope.budgets[0]);
+        $scope.hasData = true;
+        if ($scope.budgets.length > 0) {
+            pbService.prepForBroadcast($scope.budgets);
+        }
     });
 
     /** Click events **/
@@ -158,7 +172,12 @@ var PaycheckBudgetCtrl = function ($scope, $http, pbService) {
     };
 
     $scope.addBudget = function () {
-        $scope.selectedBudget = defaultBudget;
+        $scope.selectedBudget = {
+            id: null,
+            date: null,
+            amount: null,
+            budgetItems: new Array()
+        };
         $scope.shouldBeOpen = true;
         $scope.isEditing = false;
     };
@@ -178,6 +197,7 @@ var PaycheckBudgetCtrl = function ($scope, $http, pbService) {
 
     $scope.updateStatus = function (budget, budgetItem) {
         budgetItem.isPaid = true;
+        budgetItem.datePaid = new Date();
         $scope.isEditing = true;
         $scope.submitData(budget);
     };
@@ -203,15 +223,23 @@ var PaycheckBudgetCtrl = function ($scope, $http, pbService) {
 
     $scope.submitData = function (budget) {
         if (!$scope.isEditing) {
-            $http.post('api/paycheckbudget', budget).success(function (data, status) {
-                $scope.budgets = data;
-            });
+            $http.post('api/paycheckbudget', budget);
+            $scope.budgets.push(budget);
         } else {
-            $http.put('api/paycheckbudget/' + budget.id, budget).success(function (data, status) {
-                $scope.budgets = data;
-            });
+            $http.put('api/paycheckbudget/' + budget.id, budget);
+            $scope.updateBudget(budget);
         }
         $scope.shouldBeOpen = false;
+        $scope.selectedBudget = undefined;
+        pbService.prepForBroadcast($scope.budgets);
+    };
+
+    $scope.updateBudget = function (budget) {
+        for (var i = 0; i < $scope.budgets; i++) {
+            if ($scope.budgets[i].id == budget.id) {
+                $scope.budgets[i] = budget;
+            }
+        }
     };
 
     $scope.opts = {
