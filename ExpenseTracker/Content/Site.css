@@ -15,3 +15,7 @@
 .pager-container .pager button {
     margin-top: 4px;
 }
+
+.event-paid {
+    text-decoration: line-through;
+}

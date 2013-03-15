@@ -27,5 +27,8 @@ namespace ExpenseTracker.Framework.ViewModels
 
         [DataMember(Name = "borderColor")]
         public string BorderColor { get; set; }
+
+        [DataMember(Name = "className")]
+        public string CssClass { get; set; }
     }
 }

@@ -45,7 +45,11 @@ namespace ExpenseTracker.Controllers
                     EventTitle = string.Format("{0} - {1}", x.Description, x.Amount),
                     AllDayEvent = true,
                     EventStart = x.DueDate,
-                    IsEditable = false
+                    IsEditable = false,
+                    TextColor = "#ffffff",
+                    BackgroundColor = "#6F8BC4",
+                    BorderColor = "#3366CC",
+                    CssClass = (x.IsPaid) ? "event-paid" : ""
                 });
                 events.AddRange(itemEvents);
             }
