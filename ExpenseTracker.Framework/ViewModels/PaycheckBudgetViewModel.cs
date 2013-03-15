@@ -18,9 +18,6 @@ namespace ExpenseTracker.Framework.ViewModels
 
 		[DataMember(Name = "budgetItems")]
 		public List<PaycheckBudgetItemViewModel> BudgetItems { get; set; }
-
-		[DataMember(Name = "remaining")]
-		public decimal Remaining { get; set; }
 	}
 
 	[DataContract]

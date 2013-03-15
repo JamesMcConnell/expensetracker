@@ -6,13 +6,13 @@
         <div id="paycheckBudgetContent">
             <div class="pager-container">
                 <ul class="pager">
-                    <li class="previous">
+                    <li ng-class="{previous: true, disabled: !pagingInfo.hasPrevious}">
                         <a href="#" ng-click="pagePrevious()">&larr; Older</a>
                     </li>
                     <li>
                         <button class="btn btn-info btn-small" type="button" ng-click="addBudget()">Add New Paycheck</button>
                     </li>
-                    <li class="next">
+                    <li ng-class="{next: true, disabled: !pagingInfo.hasFuture}">
                         <a href="#" ng-click="pageNext()">Newer &rarr;</a>
                     </li>
                 </ul>

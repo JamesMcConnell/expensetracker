@@ -2,14 +2,14 @@
     var budgetCopy = {
         id: budget.id,
         date: budget.date,
-        amount: budget.amount,
+        amount: parseInt(budget.amount),
         budgetItems: new Array()
     };
 
     for (var i = 0; i < budget.budgetItems.length; i++) {
         budgetCopy.budgetItems.push({
             description: budget.budgetItems[i].description,
-            amount: budget.budgetItems[i].amount,
+            amount: parseInt(budget.budgetItems[i].amount),
             dueDate: budget.budgetItems[i].dueDate,
             isPaid: budget.budgetItems[i].isPaid,
             datePaid: budget.budgetItems[i].datePaid
@@ -17,6 +17,24 @@
     }
 
     return budgetCopy;
+}
+
+function prepBudgets(budgets) {
+    for (var i = 0; i < budgets.length; i++) {
+        budgets[i] = prepBudget(budgets[i]);
+    }
+
+    return budgets;
+}
+
+function prepBudget(budget) {
+    var itemTotal = 0;
+    for (var i = 0; i < budget.budgetItems.length; i++) {
+        var budgetItem = budget.budgetItems[i];
+        itemTotal += parseInt(budgetItem.amount);
+    }
+    budget.remaining = parseInt(budget.amount) - itemTotal;
+    return budget;
 }
 
 var app = angular.module('expenseTracker', ['ui', 'ui.bootstrap']);
@@ -91,8 +109,9 @@ var PaycheckBudgetCtrl = function ($scope, $http, pbService) {
     $scope.selectedBudget = undefined;
     $scope.hasData = false;
 
-    $http({ method: 'GET', url: 'api/paycheckbudget/getallbudgets' }).success(function (data, status) {
-        $scope.budgets = data;
+    $http({ method: 'GET', url: 'api/paycheckbudget/getcurrentbudgets' }).success(function (data, status) {
+        $scope.budgets = prepBudgets(data.budgets);
+        $scope.pagingInfo = data.pagingInfo;
     });
 
     /** Click events **/
@@ -124,6 +143,8 @@ var PaycheckBudgetCtrl = function ($scope, $http, pbService) {
                 break;
             }
         }
+
+        budget = prepBudget(budget);
     };
 
     $scope.updateStatus = function (budget, budgetItem) {
@@ -134,12 +155,23 @@ var PaycheckBudgetCtrl = function ($scope, $http, pbService) {
     };
 
     $scope.pagePrevious = function () {
-        var firstBudget = $scope.budgets[0];
-
+        if ($scope.pagingInfo.hasPrevious) {
+            var budget = $scope.budgets[0];
+            $http.post('api/paycheckbudget/getpreviousbudgets', budget).success(function (data, status) {
+                $scope.budgets = prepBudgets(data.budgets);
+                $scope.pagingInfo = data.pagingInfo;
+            });
+        }
     };
 
     $scope.pageNext = function () {
-        var lastBudget = $scope.budgets[$scope.budgets.length - 1];
+        if ($scope.pagingInfo.hasFuture) {
+            var budget = $scope.budgets[1];
+            $http.post('api/paycheckbudget/getfuturebudgets', budget).success(function (data, status) {
+                $scope.budgets = prepBudgets(data.budgets);
+                $scope.pagingInfo = data.pagingInfo;
+            });
+        }
     };
 
     /** Click events **/
@@ -155,8 +187,8 @@ var PaycheckBudgetCtrl = function ($scope, $http, pbService) {
     $scope.submitData = function (budget) {
         if (!$scope.isEditing) {
             $http.post('api/paycheckbudget/addbudget', budget).success(function (data, status) {
-                budget.id = data;
-                $scope.budgets.push(budget);
+                $scope.budgets = prepBudgets(data.budgets);
+                $scope.pagingInfo = data.pagingInfo;
                 pbService.reloadCalendarEvents();
             });
         } else {
@@ -173,7 +205,7 @@ var PaycheckBudgetCtrl = function ($scope, $http, pbService) {
     $scope.updateBudget = function (budget) {
         for (var i = 0; i < $scope.budgets.length; i++) {
             if ($scope.budgets[i].id == budget.id) {
-                $scope.budgets[i] = budget;
+                $scope.budgets[i] = prepBudget(budget);
             }
         }
     };

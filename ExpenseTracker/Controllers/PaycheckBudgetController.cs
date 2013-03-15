@@ -18,7 +18,41 @@ namespace ExpenseTracker.Controllers
             _docSession = docSession;
 		}
 
-        #region Custom Routes
+        private PaycheckBudgetResponse GetBudgets(DateTime offset)
+        {
+            var budgetResponse = new PaycheckBudgetResponse
+            {
+                PagingInfo = new PagingInfo(),
+                Budgets = new List<PaycheckBudgetViewModel>()
+            };
+
+            var budgets = _docSession.Query<PaycheckBudget>().ToList();
+            var currentBudgets = budgets.Where(b => b.Date.Date >= offset.Date).OrderBy(b => b.Date).Take(2).ToList();
+            budgetResponse.PagingInfo.HasPrevious = budgets.Any(b => b.Date.Date < offset.Date);
+            budgetResponse.PagingInfo.HasFuture = budgets.Any(b => b.Date.Date > currentBudgets[1].Date.Date);
+
+            foreach (var budget in currentBudgets)
+            {
+                var paycheckBudget = new PaycheckBudgetViewModel
+                {
+                    Id = budget.Id,
+                    Amount = budget.Amount,
+                    Date = budget.Date,
+                    BudgetItems = budget.BudgetItems.Select(x => new PaycheckBudgetItemViewModel
+                    {
+                        Amount = x.Amount,
+                        Description = x.Description,
+                        IsPaid = x.IsPaid,
+                        DueDate = x.DueDate,
+                        DatePaid = x.DatePaid
+                    }).ToList()
+                };
+                budgetResponse.Budgets.Add(paycheckBudget);
+            }
+
+            return budgetResponse;
+        }
+
         // GET api/paycheckbudget/getbudgetitemsascalendarevents
         [HttpGet]
         [ActionName("GetBudgetItemsAsCalendarEvents")]
@@ -56,37 +90,29 @@ namespace ExpenseTracker.Controllers
 
             return events;
         }
-        #endregion
 
         // GET api/paycheckbudget/getallbudgets
         [HttpGet]
-        [ActionName("GetAllBudgets")]
-        public IEnumerable<PaycheckBudgetViewModel> GetAllBudgets()
+        [ActionName("GetCurrentBudgets")]
+        public PaycheckBudgetResponse GetCurrentBudgets()
         {
-            var allBudgets = _docSession.Query<PaycheckBudget>().ToList().OrderBy(pb => pb.Date);
-            List<PaycheckBudgetViewModel> paycheckBudgets = new List<PaycheckBudgetViewModel>();
-            foreach (var budget in allBudgets)
-            {
-                var paycheckBudget = new PaycheckBudgetViewModel
-                {
-                    Id = budget.Id,
-                    Amount = budget.Amount,
-                    Date = budget.Date,
-                    BudgetItems = budget.BudgetItems.Select(x => new PaycheckBudgetItemViewModel
-                    {
-                        Amount = x.Amount,
-                        Description = x.Description,
-                        IsPaid = x.IsPaid,
-                        DueDate = x.DueDate,
-                        DatePaid = x.DatePaid
-                    }).ToList()
-                };
+            return GetBudgets(DateTime.Now);
+        }
 
-                paycheckBudget.Remaining = paycheckBudget.Amount - paycheckBudget.BudgetItems.Sum(pbi => pbi.Amount);
-                paycheckBudgets.Add(paycheckBudget);
-            }
+        // POST api/paycheckbudget/getpagedbudgets
+        [HttpPost]
+        [ActionName("GetPreviousBudgets")]
+        public PaycheckBudgetResponse GetPreviousBudgets(PaycheckBudgetViewModel budgetViewModel)
+        {
+            var dateOffset = budgetViewModel.Date.AddDays(-14); // We want to go back 2 weeks from the given date
+            return GetBudgets(dateOffset);
+        }
 
-            return paycheckBudgets;
+        [HttpPost]
+        [ActionName("GetFutureBudgets")]
+        public PaycheckBudgetResponse GetFutureBudgets(PaycheckBudgetViewModel budgetViewModel)
+        {
+            return GetBudgets(budgetViewModel.Date);
         }
 
         // GET api/paycheckbudget/getbudget/5
@@ -109,16 +135,13 @@ namespace ExpenseTracker.Controllers
                     DatePaid = x.DatePaid
                 }).ToList()
             };
-
-            paycheckBudget.Remaining = paycheckBudget.Amount - paycheckBudget.BudgetItems.Sum(pbi => pbi.Amount);
-
             return paycheckBudget;
         }
 
         // POST api/paycheckbudget/addbudget
         [HttpPost]
         [ActionName("AddBudget")]
-        public int AddBudget(PaycheckBudgetViewModel budgetViewModel)
+        public PaycheckBudgetResponse AddBudget(PaycheckBudgetViewModel budgetViewModel)
         {
             var paycheckBudget = new PaycheckBudget
             {
@@ -137,7 +160,7 @@ namespace ExpenseTracker.Controllers
             _docSession.Store(paycheckBudget);
             _docSession.SaveChanges();
 
-            return paycheckBudget.Id;
+            return GetCurrentBudgets();
         }
 
         // PUT api/paycheckbudget/updatebudget/5
