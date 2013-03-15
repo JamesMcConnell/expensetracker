@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="Models\PaycheckBudget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\BudgetItemAsEvent.cs" />
     <Compile Include="ViewModels\PaycheckBudgetViewModel.cs" />
   </ItemGroup>
   <ItemGroup />

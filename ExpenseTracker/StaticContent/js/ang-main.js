@@ -50,41 +50,23 @@ app.directive('pbCalendar', function ($parse) {
                 }
             };
             var sources = scope.$eval(attrs.ngModel);
-            var tracker = 0;
-            var getSources = function () {
-                var equalsTracker = scope.$eval(attrs.equalsTracker);
-                tracker = 0;
-                angular.forEach(sources, function (value, key) {
-                    if (angular.isArray(value)) {
-                        tracker += value.length;
-                    }
-                });
-                if (angular.isNumber(equalsTracker)) {
-                    return tracker + sources.length + equalsTracker;
-                } else {
-                    return tracker + sources.length;
-                }
-            };
-            function update() {
-                scope.calendar = element.html('');
-                var view = scope.calendar.fullCalendar('getView');
-                if (view) {
-                    view = view.name;
-                }
-
-                var expression, options = { defaultView: view, events: sources };
-                if (attrs.pbCalendar) {
-                    expression = scope.$eval(attrs.uiCalendar);
-                }
-                else {
-                    expression = {};
-                }
-                angular.extend(options, baseOptions, expression);
-                scope.calendar.fullCalendar(options);
+            scope.calendar = element.html('');
+            var view = scope.calendar.fullCalendar('getView');
+            if (view) {
+                view = view.name;
             }
-            update();
-            scope.$watch(getSources, function (newVal, oldVal) {
-                update();
+
+            var expression, options = { defaultView: view, events: sources };
+            if (attrs.pbCalendar) {
+                expression = scope.$eval(attrs.uiCalendar);
+            } else {
+                expression = {};
+            }
+            angular.extend(options, baseOptions, expression);
+            scope.calendar.fullCalendar(options);
+
+            scope.$on('reloadEvents', function () {
+                scope.calendar.fullCalendar('refetchEvents');
             });
         }
     };
@@ -94,74 +76,23 @@ app.factory('paycheckBudgetService', function ($rootScope, $http) {
     var service = {};
     service.budgets = [];
 
-    service.prepForBroadcast = function (budgets) {
-        this.budgets = budgets;
-        this.broadcastItem();
-    };
-
-    service.broadcastItem = function () {
-        $rootScope.$broadcast('budgetsLoaded');
+    service.reloadCalendarEvents = function () {
+        $rootScope.$broadcast('reloadEvents');
     };
 
     return service;
 });
 
 var CalendarCtrl = function ($scope, pbService) {
-    $scope.events = [];
-    $scope.eventExists = function (newEvent) {
-        angular.forEach($scope.events, function (value, key) {
-            if (value.title == newEvent.title) {
-                return true;
-            }
-        });
-
-        return false;
-    };
-
-    $scope.$on('budgetsLoaded', function () {
-        angular.forEach(pbService.budgets, function (budget, key) {
-            var paydayEvent = {
-                title: 'Payday - ' + budget.amount,
-                allDay: true,
-                start: budget.date,
-                editable: false,
-                textColor: '#3a87ad',
-                backgroundColor: '#d9edf7',
-                borderColor: '#bce8f1'
-            };
-
-            var paydayEventExists = $scope.eventExists(paydayEvent);
-            if (!paydayEventExists) {
-                $scope.events.push(paydayEvent);
-            }
-
-            angular.forEach(budget.budgetItems, function (budgetItem, key) {
-                var itemEvent = {
-                    title: budgetItem.description + ' - ' + budgetItem.amount,
-                    allDay: true,
-                    start: budgetItem.dueDate,
-                    editable: false
-                };
-
-                var itemEventExists = $scope.eventExists(itemEvent);
-                if (!itemEventExists) {
-                    $scope.events.push(itemEvent);
-                }
-            });
-        });
-    });
+    $scope.eventSource = 'api/paycheckbudget/GetBudgetItemsAsCalendarEvents';
 }
 
 var PaycheckBudgetCtrl = function ($scope, $http, pbService) {
     $scope.selectedBudget = undefined;
     $scope.hasData = false;
 
-    $http({ method: 'GET', url: 'api/paycheckbudget' }).success(function (data, status) {
+    $http({ method: 'GET', url: 'api/paycheckbudget/getallbudgets' }).success(function (data, status) {
         $scope.budgets = data;
-        $scope.hasData = true;
-        if ($scope.budgets.length > 0) {
-            pbService.prepForBroadcast($scope.budgets);
-        }
     });
 
     /** Click events **/
@@ -223,19 +154,24 @@ var PaycheckBudgetCtrl = function ($scope, $http, pbService) {
 
     $scope.submitData = function (budget) {
         if (!$scope.isEditing) {
-            $http.post('api/paycheckbudget', budget);
-            $scope.budgets.push(budget);
+            $http.post('api/paycheckbudget/addbudget', budget).success(function (data, status) {
+                budget.id = data;
+                $scope.budgets.push(budget);
+                pbService.reloadCalendarEvents();
+            });
         } else {
-            $http.put('api/paycheckbudget/' + budget.id, budget);
-            $scope.updateBudget(budget);
+            $http.put('api/paycheckbudget/updatebudget/' + budget.id, budget).success(function (data, status) {
+                $scope.updateBudget(budget);
+                pbService.reloadCalendarEvents();
+            });
         }
+
         $scope.shouldBeOpen = false;
         $scope.selectedBudget = undefined;
-        pbService.prepForBroadcast($scope.budgets);
     };
 
     $scope.updateBudget = function (budget) {
-        for (var i = 0; i < $scope.budgets; i++) {
+        for (var i = 0; i < $scope.budgets.length; i++) {
             if ($scope.budgets[i].id == budget.id) {
                 $scope.budgets[i] = budget;
             }
