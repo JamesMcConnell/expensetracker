@@ -47,12 +47,14 @@
 			</div>
 		</div>
 
-        @Scripts.Render("~/bundles/jquery")
-		@Scripts.Render("~/bundles/jqueryui")
-		@Scripts.Render("~/bundles/twitterbootstrap")
-        @Scripts.Render("~/bundles/angular")
-        @Scripts.Render("~/bundles/plugins")
-        @Scripts.Render("~/bundles/static")
+		<script type="text/javascript" src="../../Scripts/jquery/jquery-1.7.1.min.js"></script>
+		<script type="text/javascript" src="../../Scripts/jquery/jquery-ui-1.8.20.min.js"></script>
+		<script type="text/javascript" src="../../Scripts/bootstrap.js"></script>
+		<script type="text/javascript" src="../../Scripts/angular/angular.min.js"></script>
+		<script type="text/javascript" src="../../Scripts/angular/angular-ui.js"></script>
+		<script type="text/javascript" src="../../Scripts/angular/ui-bootstrap-0.2.0.js"></script>
+		<script type="text/javascript" src="../../Scripts/fullcalendar.js"></script>
+		<script type="text/javascript" src="../../StaticContent/js/ang-main.js"></script>
 
         @RenderSection("scripts", required: false)
     </body>
