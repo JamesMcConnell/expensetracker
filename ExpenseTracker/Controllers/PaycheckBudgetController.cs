@@ -4,18 +4,18 @@ using System.Linq;
 using System.Web.Http;
 using ExpenseTracker.Framework.Models;
 using ExpenseTracker.Framework.ViewModels;
-using Raven.Client;
-using System.Net;using System.Net.Http;
+using System.Net;
+using System.Net.Http;
 
 namespace ExpenseTracker.Controllers
 {
     public class PaycheckBudgetController : ApiController
     {
-        private readonly IDocumentSession _docSession;
+		private readonly ExpenseTrackerEntities _db;
 
-		public PaycheckBudgetController(IDocumentSession docSession)
+        public PaycheckBudgetController()
 		{
-            _docSession = docSession;
+			_db = new ExpenseTrackerEntities();
 		}
 
         private PaycheckBudgetResponse GetBudgets(DateTime offset)
@@ -26,20 +26,28 @@ namespace ExpenseTracker.Controllers
                 Budgets = new List<PaycheckBudgetViewModel>()
             };
 
-            var budgets = _docSession.Query<PaycheckBudget>().ToList();
-            var currentBudgets = budgets.Where(b => b.Date.Date >= offset.Date).OrderBy(b => b.Date).Take(2).ToList();
-            budgetResponse.PagingInfo.HasPrevious = budgets.Any(b => b.Date.Date < offset.Date);
-            budgetResponse.PagingInfo.HasFuture = budgets.Any(b => b.Date.Date > currentBudgets[1].Date.Date);
+			var budgets = _db.Budgets.ToList();
+            var currentBudgets = budgets.Where(b => b.BudgetDate >= offset.Date).OrderBy(b => b.BudgetDate).Take(2).ToList();
+            budgetResponse.PagingInfo.HasPrevious = budgets.Any(b => b.BudgetDate.Date < offset.Date);
+			if (currentBudgets.Count > 1)
+			{
+				budgetResponse.PagingInfo.HasFuture = budgets.Any(b => b.BudgetDate.Date > currentBudgets[1].BudgetDate.Date);
+			}
+			else
+			{
+				budgetResponse.PagingInfo.HasFuture = false;
+			}
 
             foreach (var budget in currentBudgets)
             {
                 var paycheckBudget = new PaycheckBudgetViewModel
                 {
-                    Id = budget.Id,
-                    Amount = budget.Amount,
-                    Date = budget.Date,
+                    Id = budget.BudgetId,
+                    Amount = budget.BudgetAmount,
+                    Date = budget.BudgetDate,
                     BudgetItems = budget.BudgetItems.Select(x => new PaycheckBudgetItemViewModel
                     {
+						Id = x.BudgetItemId,
                         Amount = x.Amount,
                         Description = x.Description,
                         IsPaid = x.IsPaid,
@@ -58,15 +66,15 @@ namespace ExpenseTracker.Controllers
         [ActionName("GetBudgetItemsAsCalendarEvents")]
         public IEnumerable<BudgetItemAsEvent> GetBudgetItemsAsCalendarEvents()
         {
-            var budgets = _docSession.Query<PaycheckBudget>().ToList().OrderBy(pb => pb.Date);
+			var budgets = _db.Budgets.OrderBy(b => b.BudgetDate);
             List<BudgetItemAsEvent> events = new List<BudgetItemAsEvent>();
             foreach (var budget in budgets)
             {
                 var paydayEvent = new BudgetItemAsEvent
                 {
-                    EventTitle = string.Format("Payday - {0}", budget.Amount),
+                    EventTitle = string.Format("Payday - {0}", budget.BudgetAmount),
                     AllDayEvent = true,
-                    EventStart = budget.Date,
+                    EventStart = budget.BudgetDate,
                     IsEditable = false,
                     TextColor = "#3a87ad",
                     BackgroundColor = "#d9edf7",
@@ -120,14 +128,15 @@ namespace ExpenseTracker.Controllers
         [ActionName("GetBudget")]
         public PaycheckBudgetViewModel GetBudget(int id)
         {
-            var budget = _docSession.Load<PaycheckBudget>(id);
+			var budget = _db.Budgets.FirstOrDefault(b => b.BudgetId == id);
             var paycheckBudget = new PaycheckBudgetViewModel
             {
-                Id = budget.Id,
-                Amount = budget.Amount,
-                Date = budget.Date,
+                Id = budget.BudgetId,
+                Amount = budget.BudgetAmount,
+                Date = budget.BudgetDate,
                 BudgetItems = budget.BudgetItems.Select(x => new PaycheckBudgetItemViewModel
                 {
+					Id = x.BudgetItemId,
                     Amount = x.Amount,
                     Description = x.Description,
                     IsPaid = x.IsPaid,
@@ -143,22 +152,26 @@ namespace ExpenseTracker.Controllers
         [ActionName("AddBudget")]
         public PaycheckBudgetResponse AddBudget(PaycheckBudgetViewModel budgetViewModel)
         {
-            var paycheckBudget = new PaycheckBudget
-            {
-                Amount = budgetViewModel.Amount,
-                Date = budgetViewModel.Date,
-                BudgetItems = budgetViewModel.BudgetItems.Select(x => new PaycheckBudgetItem
-                {
-                    Amount = x.Amount,
-                    Description = x.Description,
-                    IsPaid = x.IsPaid,
-                    DueDate = x.DueDate,
-                    DatePaid = x.DatePaid
-                }).ToList()
-            };
+			var budget = new Budget
+			{
+				BudgetAmount = budgetViewModel.Amount,
+				BudgetDate = budgetViewModel.Date
+			};
 
-            _docSession.Store(paycheckBudget);
-            _docSession.SaveChanges();
+			foreach (var budgetItem in budgetViewModel.BudgetItems)
+			{
+				budget.BudgetItems.Add(new BudgetItem
+				{
+					Amount = budgetItem.Amount,
+					Description = budgetItem.Description,
+					IsPaid = budgetItem.IsPaid,
+					DueDate = budgetItem.DueDate,
+					DatePaid = budgetItem.DueDate // When adding a new budget, the date paid has to have a valid date, so give it the due date.
+				});
+			}
+
+			_db.Budgets.AddObject(budget);
+			_db.SaveChanges();
 
             return GetCurrentBudgets();
         }
@@ -168,19 +181,21 @@ namespace ExpenseTracker.Controllers
         [ActionName("UpdateBudget")]
         public HttpResponseMessage UpdateBudget(int id, PaycheckBudgetViewModel budgetViewModel)
         {
-            var dbBudget = _docSession.Load<PaycheckBudget>(id);
-            dbBudget.Amount = budgetViewModel.Amount;
-            dbBudget.Date = budgetViewModel.Date;
-            dbBudget.BudgetItems = budgetViewModel.BudgetItems.Select(x => new PaycheckBudgetItem
-            {
-                Amount = x.Amount,
-                Description = x.Description,
-                IsPaid = x.IsPaid,
-                DueDate = x.DueDate,
-                DatePaid = x.DatePaid
-            }).ToList();
+			var dbBudget = _db.Budgets.FirstOrDefault(b => b.BudgetId == id);
+            dbBudget.BudgetAmount = budgetViewModel.Amount;
+            dbBudget.BudgetDate = budgetViewModel.Date;
 
-            _docSession.SaveChanges();
+			foreach (var budgetItem in budgetViewModel.BudgetItems)
+			{
+				var dbBudgetItem = dbBudget.BudgetItems.FirstOrDefault(bi => bi.BudgetItemId == budgetItem.Id);
+				dbBudgetItem.Amount = budgetItem.Amount;
+				dbBudgetItem.Description = budgetItem.Description;
+				dbBudgetItem.IsPaid = budgetItem.IsPaid;
+				dbBudgetItem.DueDate = budgetItem.DueDate;
+				dbBudgetItem.DatePaid = budgetItem.DatePaid;
+			}
+
+            _db.SaveChanges();
 
             return new HttpResponseMessage { StatusCode = HttpStatusCode.OK };
         }

@@ -1,0 +1,152 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="2.0" xmlns:edmx="http://schemas.microsoft.com/ado/2008/10/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="ExpenseTrackerModel.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2008" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/02/edm/ssdl">
+        <EntityContainer Name="ExpenseTrackerModelStoreContainer">
+          <EntitySet Name="Budget" EntityType="ExpenseTrackerModel.Store.Budget" store:Type="Tables" Schema="dbo" />
+          <EntitySet Name="BudgetItem" EntityType="ExpenseTrackerModel.Store.BudgetItem" store:Type="Tables" Schema="dbo" />
+          <AssociationSet Name="FK_BudgetItem_0" Association="ExpenseTrackerModel.Store.FK_BudgetItem_0">
+            <End Role="Budget" EntitySet="Budget" />
+            <End Role="BudgetItem" EntitySet="BudgetItem" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="Budget">
+          <Key>
+            <PropertyRef Name="BudgetId" />
+          </Key>
+          <Property Name="BudgetId" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="BudgetDate" Type="datetime" Nullable="false" />
+          <Property Name="BudgetAmount" Type="decimal" Nullable="false" />
+        </EntityType>
+        <EntityType Name="BudgetItem">
+          <Key>
+            <PropertyRef Name="BudgetItemId" />
+          </Key>
+          <Property Name="BudgetItemId" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="BudgetId" Type="int" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" Nullable="false" MaxLength="255" />
+          <Property Name="DatePaid" Type="datetime" Nullable="false" />
+          <Property Name="Amount" Type="decimal" Nullable="false" />
+          <Property Name="IsPaid" Type="bit" Nullable="false" />
+          <Property Name="DueDate" Type="datetime" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_BudgetItem_0">
+          <End Role="Budget" Type="ExpenseTrackerModel.Store.Budget" Multiplicity="1" />
+          <End Role="BudgetItem" Type="ExpenseTrackerModel.Store.BudgetItem" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Budget">
+              <PropertyRef Name="BudgetId" />
+            </Principal>
+            <Dependent Role="BudgetItem">
+              <PropertyRef Name="BudgetId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="ExpenseTrackerModel" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+        <EntityContainer Name="ExpenseTrackerEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Budgets" EntityType="ExpenseTrackerModel.Budget" />
+          <EntitySet Name="BudgetItems" EntityType="ExpenseTrackerModel.BudgetItem" />
+          <AssociationSet Name="FK_BudgetItem_0" Association="ExpenseTrackerModel.FK_BudgetItem_0">
+            <End Role="Budget" EntitySet="Budgets" />
+            <End Role="BudgetItem" EntitySet="BudgetItems" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="Budget">
+          <Key>
+            <PropertyRef Name="BudgetId" />
+          </Key>
+          <Property Name="BudgetId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="BudgetDate" Type="DateTime" Nullable="false" />
+          <Property Name="BudgetAmount" Type="Decimal" Nullable="false" Precision="18" Scale="0" />
+          <NavigationProperty Name="BudgetItems" Relationship="ExpenseTrackerModel.FK_BudgetItem_0" FromRole="Budget" ToRole="BudgetItem" />
+        </EntityType>
+        <EntityType Name="BudgetItem">
+          <Key>
+            <PropertyRef Name="BudgetItemId" />
+          </Key>
+          <Property Name="BudgetItemId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="BudgetId" Type="Int32" Nullable="false" />
+          <Property Name="Description" Type="String" Nullable="false" MaxLength="255" Unicode="true" FixedLength="false" />
+          <Property Name="Amount" Type="Decimal" Nullable="false" Precision="18" Scale="0" />
+          <Property Name="IsPaid" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Budget" Relationship="ExpenseTrackerModel.FK_BudgetItem_0" FromRole="BudgetItem" ToRole="Budget" />
+          <Property Type="DateTime" Name="DatePaid" Nullable="false" />
+          <Property Type="DateTime" Name="DueDate" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_BudgetItem_0">
+          <End Role="Budget" Type="ExpenseTrackerModel.Budget" Multiplicity="1" />
+          <End Role="BudgetItem" Type="ExpenseTrackerModel.BudgetItem" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Budget">
+              <PropertyRef Name="BudgetId" />
+            </Principal>
+            <Dependent Role="BudgetItem">
+              <PropertyRef Name="BudgetId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2008/09/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="ExpenseTrackerModelStoreContainer" CdmEntityContainer="ExpenseTrackerEntities">
+          <EntitySetMapping Name="Budgets">
+            <EntityTypeMapping TypeName="ExpenseTrackerModel.Budget">
+              <MappingFragment StoreEntitySet="Budget">
+                <ScalarProperty Name="BudgetId" ColumnName="BudgetId" />
+                <ScalarProperty Name="BudgetDate" ColumnName="BudgetDate" />
+                <ScalarProperty Name="BudgetAmount" ColumnName="BudgetAmount" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BudgetItems">
+            <EntityTypeMapping TypeName="ExpenseTrackerModel.BudgetItem">
+              <MappingFragment StoreEntitySet="BudgetItem">
+                <ScalarProperty Name="DueDate" ColumnName="DueDate" />
+                <ScalarProperty Name="DatePaid" ColumnName="DatePaid" />
+                <ScalarProperty Name="BudgetItemId" ColumnName="BudgetItemId" />
+                <ScalarProperty Name="BudgetId" ColumnName="BudgetId" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Amount" ColumnName="Amount" />
+                <ScalarProperty Name="IsPaid" ColumnName="IsPaid" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2008/10/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="True" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="True" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams>
+      <Diagram Name="Model1">
+        <EntityTypeShape EntityType="ExpenseTrackerModel.Budget" Width="1.5" PointX="0.75" PointY="1.25" Height="1.7879850260416668" IsExpanded="true" />
+        <EntityTypeShape EntityType="ExpenseTrackerModel.BudgetItem" Width="1.5" PointX="3" PointY="1" Height="2.5571907552083335" IsExpanded="true" />
+        <AssociationConnector Association="ExpenseTrackerModel.FK_BudgetItem_0" ManuallyRouted="false">
+          <ConnectorPoint PointX="2.25" PointY="2.1439925130208333" />
+          <ConnectorPoint PointX="3" PointY="2.1439925130208333" />
+        </AssociationConnector>
+      </Diagram>
+    </Diagrams>
+  </Designer>
+</edmx:Edmx>
